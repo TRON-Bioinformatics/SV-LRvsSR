@@ -72,7 +72,7 @@ def align(FaFile, Read1, Read2, outdir,tmpdir, nthreads , typeof):
     with open(str(tmpdir)+"/filtered_"+typeof+".bam",'w') as outstream:
         p_filter=subprocess.Popen(['samtools','view','-bS','-F','4'], stdin=p_main.stdout, stdout=outstream)
     p_filter.communicate(), p_filter.wait()
-    print tmpdir, str(tmpdir)+"/filtered_"+typeof+".bam"
+    # print tmpdir, str(tmpdir)+"/filtered_"+typeof+".bam"
     p_sort=subprocess.Popen(['sambamba','sort','-t',str(nthreads),'--tmpdir=',str(tmpdir), str(tmpdir)+"/filtered_"+typeof+".bam"])
     p_sort.wait()
 

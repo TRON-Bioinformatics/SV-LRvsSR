@@ -31,17 +31,17 @@ def NumberTools(WholeLine):
     return tools
 
 def Add_features(CombinedFile, refBit, areaRequant, tmpdir):
-    ID=id_generator()
+    # ID=id_generator()
     totalTools=[]
-    FusedSeqT_fa=open(str(tmpdir)+"/TumorSV_"+str(ID)+".fa", 'w')
-    requantificationBP=open(str(tmpdir)+"/requantBP_"+str(ID)+".txt",'w')
+    # FusedSeqT_fa=open(str(tmpdir)+"/TumorSV_"+str(ID)+".fa", 'w')
+    # requantificationBP=open(str(tmpdir)+"/requantBP_"+str(ID)+".txt",'w')
     for i in range(CombinedFile.shape[0]):
         totalTools.append(NumberTools(CombinedFile.iloc[i]))
-        Requant, areaRequantT=find_requant(CombinedFile.iloc[i], refBit, areaRequant)
-        requantificationBP.write(str(CombinedFile.iloc[i]['chrom1'])+":"+ str(CombinedFile.iloc[i]['pos1']) + "_"+ str(CombinedFile.iloc[i]['chrom2:pos2']) + "_"+ str(CombinedFile.iloc[i]['SVType'])+"_"+ str(CombinedFile.iloc[i]['Orientation'])+ '\t'+str(areaRequantT)+ '\n')
-        FusedSeqT_fa.write(">"+str(CombinedFile.iloc[i]['chrom1'])+":"+ str(CombinedFile.iloc[i]['pos1']) + "_"+ str(CombinedFile.iloc[i]['chrom2:pos2']) + "_"+ str(CombinedFile.iloc[i]['SVType'])+"_"+ str(CombinedFile.iloc[i]['Orientation'])+'\n' + Requant+'\n')
-    FusedSeqT_fa.close()
-    requantificationBP.close()
+    #     Requant, areaRequantT=find_requant(CombinedFile.iloc[i], refBit, areaRequant)
+    #     requantificationBP.write(str(CombinedFile.iloc[i]['chrom1'])+":"+ str(CombinedFile.iloc[i]['pos1']) + "_"+ str(CombinedFile.iloc[i]['chrom2:pos2']) + "_"+ str(CombinedFile.iloc[i]['SVType'])+"_"+ str(CombinedFile.iloc[i]['Orientation'])+ '\t'+str(areaRequantT)+ '\n')
+    #     FusedSeqT_fa.write(">"+str(CombinedFile.iloc[i]['chrom1'])+":"+ str(CombinedFile.iloc[i]['pos1']) + "_"+ str(CombinedFile.iloc[i]['chrom2:pos2']) + "_"+ str(CombinedFile.iloc[i]['SVType'])+"_"+ str(CombinedFile.iloc[i]['Orientation'])+'\n' + Requant+'\n')
+    # FusedSeqT_fa.close()
+    # requantificationBP.close()
     CombinedFile['NumberTools']=pd.Series(totalTools, index=CombinedFile.index)
     return CombinedFile
 
@@ -50,30 +50,30 @@ def calculateRequant(outdir, CombinedFile, SR_R1, SR_R2, tmpdir, junc_cutoff, nt
     requantificationBP={}
     # combine all synthtic genomic templates for all SVs
     os.chdir(tmpdir)
-    requantBPFiles=glob.glob('./requantBP*.txt')
-    commandCombRequant=['cat']+requantBPFiles
-    with open(str(outdir)+"/BP_All.txt",'w') as F:
-        combineReq=subprocess.Popen(commandCombRequant, stdout=F)
+    # requantBPFiles=glob.glob('./requantBP*.txt')
+    # commandCombRequant=['cat']+requantBPFiles
+    # with open(str(outdir)+"/BP_All.txt",'w') as F:
+    #     combineReq=subprocess.Popen(commandCombRequant, stdout=F)
 
-    files=os.listdir(tmpdir)
-    FaFiles=['cat']+[i for i in files if i.endswith(".fa")]
-    with open(str(outdir)+"/FinalFasta.fa",'w') as COMB:
-       combineFasta=subprocess.Popen(FaFiles, stdout=COMB)
-    combineReq.wait()
-    combineFasta.wait()
-    F.close()
-    COMB.close()
+    # files=os.listdir(tmpdir)
+    # FaFiles=['cat']+[i for i in files if i.endswith(".fa")]
+    # with open(str(outdir)+"/FinalFasta.fa",'w') as COMB:
+    #    combineFasta=subprocess.Popen(FaFiles, stdout=COMB)
+    # combineReq.wait()
+    # combineFasta.wait()
+    # F.close()
+    # COMB.close()
     with open(str(outdir)+"/BP_All.txt",'r') as f:
         for line in f:
             line_list=line.split('\t')
             requantificationBP[line_list[0]]=int(line_list[1])
 
     print "aligning cWGS reads to genomic templates (requantification)"
-    align(str(outdir)+"/FinalFasta.fa",SR_R1, SR_R2, outdir, tmpdir, nthreads, "SR")
+    # align(str(outdir)+"/FinalFasta.fa",SR_R1, SR_R2, outdir, tmpdir, nthreads, "SR")
     COUNTS_SR=calculate_Junc_Span(str(outdir)+"/FinalFasta.fa", str(tmpdir)+"/filtered_SR.sorted.bam", junc_cutoff, outdir, requantificationBP, "SR")
 
     # print "aligning 10XWGS reads to genomic templates (requantification)"
-    align(str(outdir)+"/FinalFasta.fa",LR_R1, LR_R2, outdir, tmpdir, nthreads, "LR")
+    # align(str(outdir)+"/FinalFasta.fa",LR_R1, LR_R2, outdir, tmpdir, nthreads, "LR")
     COUNTS_LR=calculate_Junc_Span(str(outdir)+"/FinalFasta.fa", str(tmpdir)+"/filtered_LR.sorted.bam", junc_cutoff, outdir, requantificationBP, "LR")
 
     print "Calculating junction and spanning reads"
@@ -134,4 +134,4 @@ if __name__=='__main__':
     final_result= [worker.get() for worker in workers]
     FinalCombinedFile_1=pd.concat(results for results in final_result)
     FinalCombinedFile_2=calculateRequant(args.outdir, FinalCombinedFile_1, args.Read1_SR, args.Read2_SR, args.tmpdir, args.junc_cutoff, nthreads, args.Read1_LR, args.Read2_LR)
-    FinalCombinedFile_2.to_csv(str(args.outdir)+"/"+str(args.output), sep="\t", index=False)
+    FinalCombinedFile_2.to_csv(args.output, sep="\t", index=False)

@@ -84,4 +84,4 @@ if __name__=='__main__':
     mainCol=list(All_SV.columns.values)
     mainCol=mainCol+ ['Count_common_bar','Count_common_mol']
     CombinedGEM.columns=mainCol
-    CombinedGEM.to_csv(args.output, sep='\t', index=False)
+    CombinedGEM.to_csv(args.output, sep=',', index=False)

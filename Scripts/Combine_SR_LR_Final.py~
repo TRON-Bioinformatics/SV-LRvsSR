@@ -1,4 +1,3 @@
-
 """
 Description: Script to combine SV calls from short-reads and linked-reads
 Author: Riccha Sethi
@@ -199,41 +198,22 @@ def presentLinked(linked, chrom1, pos1, chrom2, pos2, svtype, orient, window, st
 
 def compare_SR_LR(linked,short, w):
     list1=[]
-    Predicted_by, Linked_chrom1, Linked_pos1, Linked_chrom2_pos2, Linked_SVType, Linked_Orient, Linked_Filter, Linked_Source, Linked_Size, Linked_Qual, Linked_HapAllelicFrac, Linked_AllelicFrac,  Linked_Pairs, Linked_Split =list(), list(), list(), list(), list(), list(), list(), list(), list(), list(), list(), list(), list(), list()
-    TofillList=[Linked_chrom1, Linked_pos1, Linked_chrom2_pos2, Linked_SVType, Linked_Orient, Linked_Filter, Linked_Source, Linked_Size, Linked_Qual, Linked_HapAllelicFrac, Linked_AllelicFrac,  Linked_Pairs, Linked_Split]
+    Predicted_by=[]
     short=short.reindex(range(0, short.shape[0])) # important to re-index so don't exclude it
     for index,row in short.iterrows():
         check1= presentLinked(linked, row["chrom1"], row['pos1'], row['chrom2:pos2'].split(":")[0], int(row['chrom2:pos2'].split(":")[1]), row['SVType'], row['Orientation'], w, "NotUNK")
         if check1==None:
             check2= presentLinked(linked, row["chrom1"], row['pos1'], row['chrom2:pos2'].split(":")[0], int(row['chrom2:pos2'].split(":")[1]), row['SVType'], row['Orientation'], w, "UNK")
             if check2==None:
-                for k in TofillList:
-                    k.append("NA")
                 Predicted_by.append("Only cWGS")
             else:
-                a=linked[check2[1]][check2[2]][check2[3]].pop(check2[4],None)
-                for k in range(len(TofillList)):
-                    TofillList[k].append(check2[0][k])
+                linked[check2[1]][check2[2]][check2[3]].pop(check2[4],None)
                 Predicted_by.append("Common")
         else:
-            b=linked[check1[1]][check1[2]][check1[3]].pop(check1[4],None)
-            for k in range(len(TofillList)):
-                TofillList[k].append(check1[0][k])
+            linked[check1[1]][check1[2]][check1[3]].pop(check1[4],None)
             Predicted_by.append("Common")
     short['Predicted_by']=Predicted_by
-    short['Linked_chrom1']=Linked_chrom1
-    short['Linked_pos1']=Linked_pos1
-    short['Linked_chrom2_pos2']=Linked_chrom2_pos2
-    short['Linked_SVType']=Linked_SVType
-    short['Linked_Orient']=Linked_Orient
-    short['Linked_Filter']=Linked_Filter
-    short['Linked_Source']=Linked_Source
-    short['Linked_Size']=Linked_Size
-    short['Linked_Qual']=Linked_Qual
-    short['Linked_HapAllelicFrac']=Linked_HapAllelicFrac
-    short['Linked_AllelicFrac']=Linked_AllelicFrac
-    short['Linked_Pairs']=Linked_Pairs
-    short['Linked_Split']=Linked_Split
+
     # add remaining linked read seq SV to common dataframe
     for svtype in linked.keys():
         for orient in linked[svtype].keys():
@@ -277,4 +257,4 @@ if __name__=='__main__':
         linked2= read_linked(args.linkedLarge, linked1)
         SV_short=pd.read_csv(args.shortreads)
         SV_short=SV_short.sort_values(['chrom1','pos1'])
-        comparedDF=compare_SR_LR(linked2, SV_short, int(args.window))
+        comparedDF=compare_SR_LR(linked, SV_short, int(args.window))
