@@ -36,43 +36,19 @@ longranger wgs --id=Sample_Linked --sample=sample --fastqs=fastq_folder/ --refer
 3. Lumpy vcf file: tumor.vcf
 4. SvABA vcf file: tumor.svaba.sort.sv.vcf
 ** Command
-python Integrate_Final.py \
--chromLengths <chromInfo_hg38.txt> \
--delly <DEL_tumor.vcf,DUP_tumor.vcf,INV_tumor.vcf,TRA_tumor.vcf> \
--lumpy <tumor.vcf> \
--svaba <tumor.svaba.sort.sv.vcf> \
--frag 500 \
--outdir . \
--mode germline \
--finalFile <Combined.csv>
+python Integrate_Final.py -chromLengths <chromInfo_hg38.txt> -delly <DEL_tumor.vcf,DUP_tumor.vcf,INV_tumor.vcf,TRA_tumor.vcf> -lumpy <tumor.vcf> -svaba <tumor.svaba.sort.sv.vcf> -frag 500 -outdir . -mode germline -finalFile <Combined.csv>
 * Find common SVs between linked-reads and short-reads calls
 ** Input files
 1. SV calls integrated from short-reads SV prediction tools: Combined.csv
 2. Small sized deletion calls from Long Ranger: dels.vcf.gz
 3. Large sized calls from Long Ranger: large_svs.vcf.gz
 ** Command
-python Combine_SR_LR_Final.py \
--SR <Combined.csv> \
--LR1 </longRanger/dels.vcf.gz> \
--LR2 </longRanger/large_svs.vcf.gz> \
--w 500
+python Combine_SR_LR_Final.py -SR <Combined.csv> -LR1 </longRanger/dels.vcf.gz> -LR2 </longRanger/large_svs.vcf.gz> -w 500
 * Perform requantification of SVs with reads sequenced from cWGS(SR) and 10XWGS(LR)
 ** Input files
 1. file containing combined SV from cWGS and 10XWGS technology: Combined_SR_LR_500.csv
 ** Command
-python Requantification_Final.py \
--inputFile <Combined_SR_LR_500.csv> \
--out <Combined_SR_LR_500_requant.tsv> \
--refBit <hg38.2bit> \
--area 500 \
--Read1_SR <SR_R1_downsampled.fastq> \
--Read2_SR <SR_R2_downsampled.fastq> \
--Read1_LR <LR_R1_125.fastq> \
--Read2_LR <LR_R2_125.fastq> \
--outdir <out> \
--tmpdir <temp> \
--cutoff 15 \
--n 30
+python Requantification_Final.py -inputFile <Combined_SR_LR_500.csv> -out <Combined_SR_LR_500_requant.tsv> -refBit <hg38.2bit> -area 500 -Read1_SR <SR_R1_downsampled.fastq> -Read2_SR <SR_R2_downsampled.fastq> -Read1_LR <LR_R1_125.fastq> -Read2_LR <LR_R2_125.fastq> -outdir <out> -tmpdir <temp> -cutoff 15 -n 30
 * Perform GEM quantification for SVs from both cWGS and 10XWGS technology
 ** Input files
 1. File containing combined calls from both the technologies:  Combined_SR_LR_500_requant.tsv
@@ -85,9 +61,4 @@ python Requantification_Final.py \
 4. sambamba sort --tmpdir=tmp -t 30 -p -o linked.sample.discord.sortedCO.bam linked.sample.discord.bam &
 5. sambamba index -t 10 linked.sample.discord.sortedCO.bam
 *** Calculate GEMs supporting SVs
-python GEM_Final.py \
--inputFile <Combined_SR_LR_500_requant.csv> \
--bam <linked.sample.discord.sortedCO.bam> \
--n 40 \
--out <Combined_SR_LR_500_requant_GEM.csv> \
--w 5000
+python GEM_Final.py -inputFile <Combined_SR_LR_500_requant.csv> -bam <linked.sample.discord.sortedCO.bam> -n 40 -out <Combined_SR_LR_500_requant_GEM.csv> -w 5000
