@@ -7,11 +7,11 @@
 2. samtools
 3. samblaster
 ** Command
-1. Alignment of reads : 
+*** Alignment of reads : 
 bwa mem -M -t -a ref_genome Read1.fq Read2.fq |samblaster -M -r -d sample.discord.sam -s sample.split.sam -u /unmapped/sample | samtools view -Sb > sample.dup_RG.bam
-2. sorting bam file and indexing: 
+*** sorting bam file and indexing: 
 samtools sort -O BAM -@10 -o sample.sortedCO.bam sample.dup_RG.bam && samtools index sample.sortedCO.bam
-3. sorting bam file containing discordant and split reads:
+*** sorting bam file containing discordant and split reads:
 samtools sort -O BAM -@10 -o sample.discord.sortedCO.bam sample.discord.sam && samtool index sample.discord.sortedCO.bam
 samtools sort -O BAM -@10 -o sample.split.sortedCO.bam sample.split.sam && samtool index sample.split.sortedCO.bam
 * Predict SVs using tools
