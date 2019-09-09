@@ -7,9 +7,9 @@
 2. samtools
 3. samblaster
 ** Command
-*** Alignment of reads : 
+*** Alignment of reads :
 bwa mem -M -t -a ref_genome Read1.fq Read2.fq |samblaster -M -r -d sample.discord.sam -s sample.split.sam -u /unmapped/sample | samtools view -Sb > sample.dup_RG.bam
-*** sorting bam file and indexing: 
+*** sorting bam file and indexing:
 samtools sort -O BAM -@10 -o sample.sortedCO.bam sample.dup_RG.bam && samtools index sample.sortedCO.bam
 *** sorting bam file containing discordant and split reads:
 samtools sort -O BAM -@10 -o sample.discord.sortedCO.bam sample.discord.sam && samtool index sample.discord.sortedCO.bam
@@ -31,7 +31,7 @@ lumpyexpress -B sample.sortedCO.bam -D sample.discord.sortedCO.bam -S sample.spl
 longranger wgs --id=Sample_Linked --sample=sample --fastqs=fastq_folder/ --reference=/human/refdata-GRCh38-2.1.0/ --lanes=1,2 --indices=SI-GA-D10 --vcmode=freebayes --somatic --localcores=20 --localmem=20
 * Integrating SV calls from Delly, Lumpy and SvABA
 ** Input files
-1. chromosome lengths: /flash/home/ricsethi/hg19_hg38_arms/chromInfo_hg38.txt
+1. chromosome lengths: chromInfo_hg38.txt
 2. Delly vcf files: DEL_tumor.vcf, DUP_tumor.vcf, INV_tumor.vcf, TRA_tumor.vcf
 3. Lumpy vcf file: tumor.vcf
 4. SvABA vcf file: tumor.svaba.sort.sv.vcf
@@ -62,3 +62,17 @@ python Requantification_Final.py -inputFile <Combined_SR_LR_500.csv> -out <Combi
 5. sambamba index -t 10 linked.sample.discord.sortedCO.bam
 *** Calculate GEMs supporting SVs
 python GEM_Final.py -inputFile <Combined_SR_LR_500_requant.csv> -bam <linked.sample.discord.sortedCO.bam> -n 40 -out <Combined_SR_LR_500_requant_GEM.csv> -w 5000
+* Train logistic regression model for cWGS technology
+** Input files
+1. File containing structural variations tested by PCR: MCF7_Final_call.tsv
+** Commands
+RScript ./Model/Model_cWGS.R
+** Model
+- Trained model= SR_Model.rds
+* Train logistic regression model for 10XWGS technology
+** Input files
+1. File containing structural variations tested by PCR: MCF7_Final_call.tsv
+** Commands
+RScript ./Model/Model_10XWGS.R
+** Model
+- Trained model= LR_Model.rds
