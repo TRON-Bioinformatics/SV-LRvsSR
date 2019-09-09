@@ -9,7 +9,7 @@ import argparse
 import itertools
 import pandas as pd
 
-def extractSV_Delly(File,SVType, allchromo):
+def extractSV_Delly(File,SVType, all_chromo):
     DICT={}
     with open(File,'r') as f:
         for line in f:
