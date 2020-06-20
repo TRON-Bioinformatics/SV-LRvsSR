@@ -1,6 +1,6 @@
 
 """
-Description: Script to combine SV calls from short-reads and linked-reads
+Description: Script to combine SV calls from short-reads and linked-reads from LongRanger
 Author: Riccha Sethi
 """
 

@@ -6,7 +6,6 @@ Author: Riccha Sethi
 ### Load packages
 
 import argparse
-import pysam
 import pandas as pd
 import os
 import itertools
@@ -18,6 +17,7 @@ from template_final import *
 pd.options.mode.chained_assignment = None
 import subprocess
 import glob
+from Tree_Rep import *
 
 def NumberTools(WholeLine):
     tools=0
@@ -30,19 +30,32 @@ def NumberTools(WholeLine):
         tools+=1
     return tools
 
+def NumberToolsLinked(WholeLine):
+    tools=0
+    ListNull= WholeLine.isnull()
+    if ListNull['Linked_chrom1']==False:
+        tools+=1
+    if ListNull['NAIBR_chrom1']==False:
+        tools+=1
+    if ListNull['GROCSV_chrom1']==False:
+        tools+=1
+    return tools
+
 def Add_features(CombinedFile, refBit, areaRequant, tmpdir):
     ID=id_generator()
-    totalTools=[]
+    totalTools, totalTools_LR=[], []
     FusedSeqT_fa=open(str(tmpdir)+"/TumorSV_"+str(ID)+".fa", 'w')
     requantificationBP=open(str(tmpdir)+"/requantBP_"+str(ID)+".txt",'w')
     for i in range(CombinedFile.shape[0]):
         totalTools.append(NumberTools(CombinedFile.iloc[i]))
+        totalTools_LR.append(NumberToolsLinked(CombinedFile.iloc[i]))
         Requant, areaRequantT=find_requant(CombinedFile.iloc[i], refBit, areaRequant)
         requantificationBP.write(str(CombinedFile.iloc[i]['chrom1'])+":"+ str(CombinedFile.iloc[i]['pos1']) + "_"+ str(CombinedFile.iloc[i]['chrom2:pos2']) + "_"+ str(CombinedFile.iloc[i]['SVType'])+"_"+ str(CombinedFile.iloc[i]['Orientation'])+ '\t'+str(areaRequantT)+ '\n')
         FusedSeqT_fa.write(">"+str(CombinedFile.iloc[i]['chrom1'])+":"+ str(CombinedFile.iloc[i]['pos1']) + "_"+ str(CombinedFile.iloc[i]['chrom2:pos2']) + "_"+ str(CombinedFile.iloc[i]['SVType'])+"_"+ str(CombinedFile.iloc[i]['Orientation'])+'\n' + Requant+'\n')
     FusedSeqT_fa.close()
     requantificationBP.close()
-    CombinedFile['NumberTools']=pd.Series(totalTools, index=CombinedFile.index)
+    CombinedFile['NumberTools_SR']=pd.Series(totalTools, index=CombinedFile.index)
+    CombinedFile['NumberTools_LR']=pd.Series(totalTools_LR, index=CombinedFile.index)
     return CombinedFile
 
 def calculateRequant(outdir, CombinedFile, SR_R1, SR_R2, tmpdir, junc_cutoff, nthreads, LR_R1, LR_R2):
@@ -58,7 +71,7 @@ def calculateRequant(outdir, CombinedFile, SR_R1, SR_R2, tmpdir, junc_cutoff, nt
     files=os.listdir(tmpdir)
     FaFiles=['cat']+[i for i in files if i.endswith(".fa")]
     with open(str(outdir)+"/FinalFasta.fa",'w') as COMB:
-       combineFasta=subprocess.Popen(FaFiles, stdout=COMB)
+        combineFasta=subprocess.Popen(FaFiles, stdout=COMB)
     combineReq.wait()
     combineFasta.wait()
     F.close()
@@ -71,11 +84,8 @@ def calculateRequant(outdir, CombinedFile, SR_R1, SR_R2, tmpdir, junc_cutoff, nt
     print "aligning cWGS reads to genomic templates (requantification)"
     align(str(outdir)+"/FinalFasta.fa",SR_R1, SR_R2, outdir, tmpdir, nthreads, "SR")
     COUNTS_SR=calculate_Junc_Span(str(outdir)+"/FinalFasta.fa", str(tmpdir)+"/filtered_SR.sorted.bam", junc_cutoff, outdir, requantificationBP, "SR")
-
-    # print "aligning 10XWGS reads to genomic templates (requantification)"
     align(str(outdir)+"/FinalFasta.fa",LR_R1, LR_R2, outdir, tmpdir, nthreads, "LR")
     COUNTS_LR=calculate_Junc_Span(str(outdir)+"/FinalFasta.fa", str(tmpdir)+"/filtered_LR.sorted.bam", junc_cutoff, outdir, requantificationBP, "LR")
-
     print "Calculating junction and spanning reads"
     JUNC_READS_SR, SPAN_READS_SR=[],[]
     JUNC_READS_LR, SPAN_READS_LR=[],[]
@@ -106,7 +116,7 @@ def split(dfm, chunk_size):
             CHUNK.append(dfm.iloc[int(rows/chunk_size)*i :, : ])
     return CHUNK
 
-if __name__=='__main__':
+def main():
     parser=argparse.ArgumentParser(description= "A python script to perform requantification for SVs using read-pairs from cWGS and 10XWGS technology")
     parser.add_argument('-inputFile','--inputFile', help="enter file containing combined calls")
     parser.add_argument('-out','--output', help="enter final csv file to which requantification counts would be added")
@@ -119,10 +129,19 @@ if __name__=='__main__':
     parser.add_argument('-Read2_LR','--Read2_LR',help="enter read2.fq from 10XWGS")
     parser.add_argument('-outdir','--outdir',help="enter output directory", default=".")
     parser.add_argument('-tmpdir','--tmpdir',help="enter path of temporary directory", default="")
-    parser.add_argument('-cutoff','--junc_cutoff', dest='junc_cutoff', type=int, help="cutoff for junction reads. a read has to overlap breakpoint with atleast <INT> bases", default=10)
-    args=parser.parse_args()
+    parser.add_argument('-cutoff','--junc_cutoff', type=int, help="cutoff for junction reads. a read has to overlap breakpoint with atleast <INT> bases", default=10)
+    parser.add_argument('-lengths','--lenChrom',help="enter file contaning length of chromosomes (Required)")
+    return parser.parse_args()
+
+if __name__=='__main__':
+    args=main()
     CombinedFile1=pd.read_csv(args.inputFile)
     CombinedFile=CombinedFile1.sample(frac=1).reset_index(drop=True)
+    lengths=dict()
+    with open(args.lenChrom) as f:
+        for line in f:
+            line_list=line.split('\t')
+            lengths[line_list[0]]=int(line_list[-1])
     nthreads=int(args.processes)
     p= multiprocessing.Pool(nthreads)
     chunks=split(CombinedFile, nthreads)

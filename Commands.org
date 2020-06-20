@@ -7,72 +7,72 @@
 2. samtools
 3. samblaster
 ** Command
-*** Alignment of reads :
-bwa mem -M -t -a ref_genome Read1.fq Read2.fq |samblaster -M -r -d sample.discord.sam -s sample.split.sam -u /unmapped/sample | samtools view -Sb > sample.dup_RG.bam
-*** sorting bam file and indexing:
-samtools sort -O BAM -@10 -o sample.sortedCO.bam sample.dup_RG.bam && samtools index sample.sortedCO.bam
-*** sorting bam file containing discordant and split reads:
+1. Alignment of reads : bwa mem -M -t -a ref_genome Read1.fq Read2.fq |samblaster -M -r -d sample.discord.sam -s sample.split.sam -u /unmapped/sample | samtools view -Sb > sample.dup_RG.bam
+2. sorting bam file and indexing: samtools sort -O BAM -@10 -o sample.sortedCO.bam sample.dup_RG.bam && samtools index sample.sortedCO.bam
+3. sorting bam file containing discordant and split reads:
 samtools sort -O BAM -@10 -o sample.discord.sortedCO.bam sample.discord.sam && samtool index sample.discord.sortedCO.bam
 samtools sort -O BAM -@10 -o sample.split.sortedCO.bam sample.split.sam && samtool index sample.split.sortedCO.bam
 * Predict SVs using tools
 ** Delly
 *** Command
-1. delly2 call -t DEL -x human.hg38.excl.tsv -q 20 -o DEL_tumor.bcf -g ref_genome sample.sortedCO.bam
-2. delly2 call -t DUP -x human.hg38.excl.tsv -q 20 -o DUP_tumor.bcf -g ref_genome sample.sortedCO.bam
-3. delly2 call -t INV -x human.hg38.excl.tsv -q 20 -o TRA_tumor.bcf -g ref_genome sample.sortedCO.bam
-4. delly2 call -t TRA -x human.hg38.excl.tsv -q 20 -o TRA_tumor.bcf -g ref_genome sample.sortedCO.bam
+1. delly2 call -t DEL -x human.hg38.excl.tsv  -o DEL_tumor.bcf -g ref_genome sample.sortedCO.bam
+2. delly2 call -t DUP -x human.hg38.excl.tsv  -o DUP_tumor.bcf -g ref_genome sample.sortedCO.bam
+3. delly2 call -t INV -x human.hg38.excl.tsv  -o TRA_tumor.bcf -g ref_genome sample.sortedCO.bam
+4. delly2 call -t TRA -x human.hg38.excl.tsv  -o TRA_tumor.bcf -g ref_genome sample.sortedCO.bam
 
 ** Lumpy
 lumpyexpress -B sample.sortedCO.bam -D sample.discord.sortedCO.bam -S sample.split.sortedCO.bam -v -o tumor.vcf
 ** SvABA
 1. svaba run -t sample.sortedCO.bam -p 20 -G ref_genome -a tumor --all-contigs
-2. grep -v \"^#\" tumor.svaba.sv.vcf |sort -nk3 > tumor.svaba.sort.sv.vcf
+2. grep -v \"^#\" tumor.svaba.unfiltered.sv.vcf |sort -nk3 > tumor.svaba.sort.sv.vcf
 ** Long Ranger
 longranger wgs --id=Sample_Linked --sample=sample --fastqs=fastq_folder/ --reference=/human/refdata-GRCh38-2.1.0/ --lanes=1,2 --indices=SI-GA-D10 --vcmode=freebayes --somatic --localcores=20 --localmem=20
+** NAIBR
+python NAIBR.py example.config
+** GROC-SV
+grocsvs --multiprocessing config.json
 * Integrating SV calls from Delly, Lumpy and SvABA
 ** Input files
-1. chromosome lengths: chromInfo_hg38.txt
+1. chromosome lengths: /flash/home/ricsethi/hg19_hg38_arms/chromInfo_hg38.txt
 2. Delly vcf files: DEL_tumor.vcf, DUP_tumor.vcf, INV_tumor.vcf, TRA_tumor.vcf
 3. Lumpy vcf file: tumor.vcf
 4. SvABA vcf file: tumor.svaba.sort.sv.vcf
 ** Command
-python Integrate_Final.py -chromLengths <chromInfo_hg38.txt> -delly <DEL_tumor.vcf,DUP_tumor.vcf,INV_tumor.vcf,TRA_tumor.vcf> -lumpy <tumor.vcf> -svaba <tumor.svaba.sort.sv.vcf> -frag 500 -outdir . -mode germline -finalFile <Combined.csv>
-* Find common SVs between linked-reads and short-reads calls
+python Integrate_Final.py -chromLengths chromInfo_hg38.txt -delly DEL_tumor.vcf,DUP_tumor.vcf,INV_tumor.vcf,TRA_tumor.vcf -lumpy tumor.vcf -svaba tumor.svaba.sort.sv.vcf -frag 500 -outdir . -mode germline -finalFile Combined.csv
+* Add Long Ranger calls to short read calls
 ** Input files
 1. SV calls integrated from short-reads SV prediction tools: Combined.csv
 2. Small sized deletion calls from Long Ranger: dels.vcf.gz
 3. Large sized calls from Long Ranger: large_svs.vcf.gz
 ** Command
-python Combine_SR_LR_Final.py -SR <Combined.csv> -LR1 </longRanger/dels.vcf.gz> -LR2 </longRanger/large_svs.vcf.gz> -w 500
+python Combine_SR_LR_Final.py -SR Combined.csv -LR1 /longRanger/dels.vcf.gz -LR2 /longRanger/large_svs.vcf.gz -w 500
+* Add NAIBR and GROC-SV calls
+python Add_NAIBR_GROCSV.py -NAIBR /NAIBR/NAIBR_SVs.bedpe -w 500 -GROCSV /GROC-SV/results/PostprocessingStep/svs_final.vcf -File Combined_SR_LR_500.csv
 * Perform requantification of SVs with reads sequenced from cWGS(SR) and 10XWGS(LR)
 ** Input files
-1. file containing combined SV from cWGS and 10XWGS technology: Combined_SR_LR_500.csv
+1. File containing combined SV from cWGS and 10XWGS technology: Combined_SR_LR_500.csv
+2. Tab delimited file containing chromosome name and lengths of chromsomes: chromLength
 ** Command
-python Requantification_Final.py -inputFile <Combined_SR_LR_500.csv> -out <Combined_SR_LR_500_requant.tsv> -refBit <hg38.2bit> -area 500 -Read1_SR <SR_R1_downsampled.fastq> -Read2_SR <SR_R2_downsampled.fastq> -Read1_LR <LR_R1_125.fastq> -Read2_LR <LR_R2_125.fastq> -outdir <out> -tmpdir <temp> -cutoff 15 -n 30
+python Requantification_Final.py -inputFile Combined_SR_LR_500_NAIBR_GROCSV.csv -out Combined_SR_LR_500_requant.tsv -refBit hg38.2bit -area 500 -Read1_SR SR_R1_downsampled.fastq -Read2_SR SR_R2_downsampled.fastq -Read1_LR LR_R1_125.fastq -Read2_LR LR_R2_125.fastq -outdir out -tmpdir temp -cutoff 15 -n 10 -lengths chromLength
 * Perform GEM quantification for SVs from both cWGS and 10XWGS technology
 ** Input files
 1. File containing combined calls from both the technologies:  Combined_SR_LR_500_requant.tsv
-2. Coordinate sorted bam file generated by Long Ranger: linked.sample.discord.sortedCO.bam
+2. Coordinate sorted bam file generated by Long Ranger: sample.discord.sortedCO.bam
 ** Commands
 *** Generating bam file from Long Ranger that contains discordant read-pairs
-1. sambamba sort --tmpdir=tmp -n -o linked.sample.readname_sorted -p -t 30 LR_bam.bam
-2. samtools view -h linked.sample.readname_sorted.bam |samblaster -a -e -d linked.sample.discord.sam -s linked.sample.split.sam -o linked.sample.bam &
-3. sambamba view -h -f bam -S -o linked.sample.discord.bam -t 30 linked.sample.discord.sam &
-4. sambamba sort --tmpdir=tmp -t 30 -p -o linked.sample.discord.sortedCO.bam linked.sample.discord.bam &
-5. sambamba index -t 10 linked.sample.discord.sortedCO.bam
+1. sambamba sort --tmpdir=tmp -n -o sample.readname_sorted -p -t 30 LR_bam.bam
+2. samtools view -h sample.readname_sorted.bam |samblaster -a -e -d sample.discord.sam -s sample.split.sam -o sample.bam &
+3. sambamba view -h -f bam -S -o sample.discord.bam -t 30 sample.discord.sam &
+4. sambamba sort --tmpdir=tmp -t 30 -p -o sample.discord.sortedCO.bam sample.discord.bam &
+5. sambamba index -t 10 sample.discord.sortedCO.bam
 *** Calculate GEMs supporting SVs
-python GEM_Final.py -inputFile <Combined_SR_LR_500_requant.csv> -bam <linked.sample.discord.sortedCO.bam> -n 40 -out <Combined_SR_LR_500_requant_GEM.csv> -w 5000
-* Train logistic regression model for cWGS technology
+python GEM_Final.py -inputFile Combined_SR_LR_500_requant.tsv -bam sample.discord.sortedCO.bam -n 40 -out Combined_SR_LR_requant_GEM.tsv -w 5000
+* Add annotations to the breakpoints
+- Annotates breakpoints with repeat region from Repeat Masker file, include unique or ambiguous mapping region and calculates local coverage across breakpoints.
 ** Input files
-1. File containing structural variations tested by PCR: MCF7_Final_call.tsv
-** Commands
-RScript ./Model/Model_cWGS.R
-** Model
-- Trained model= SR_Model.rds
-* Train logistic regression model for 10XWGS technology
-** Input files
-1. File containing structural variations tested by PCR: MCF7_Final_call.tsv
-** Commands
-RScript ./Model/Model_10XWGS.R
-** Model
-- Trained model= LR_Model.rds
+1. RepeatMasker file
+2. Mappability region
+3. BAM file for aligned short-reads
+4. BAM file for aligned linked-reads
+** Command
+python Include_annotations.py -repeatMasker RepeatMasker_hg38.bed -mappability k100.umap.bed -File Combined_SR_LR_requant_GEM.tsv -Threads 10 -BAM sample.sortedCO.bam -BAMLinked phased_possorted_bam.bam

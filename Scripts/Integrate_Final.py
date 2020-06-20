@@ -9,7 +9,7 @@ import argparse
 import itertools
 import pandas as pd
 
-def extractSV_Delly(File,SVType, all_chromo):
+def extractSV_Delly(File,SVType, allchromo):
     DICT={}
     with open(File,'r') as f:
         for line in f:
@@ -177,13 +177,13 @@ def read_svaba(File,mode,all_chromo):
                         dels[chrom1]={}
                     if CT not in dels[chrom1]:
                         dels[chrom1][CT]={}
-                    dels[chrom1][CT][pos1]=[pos1,pos2,chrom2,CT,"S","Dels"]
+                    dels[chrom1][CT][pos1]=[pos1,pos2,chrom2,CT,line1_list[6],"S","Dels"]
                 elif "Dups" in cat:
                     if chrom1 not in dups:
                         dups[chrom1]={}
                     if CT not in dups[chrom1]:
                         dups[chrom1][CT]={}
-                    dups[chrom1][CT][pos1]=[pos1,pos2,chrom2,CT,"S","Dups"]
+                    dups[chrom1][CT][pos1]=[pos1,pos2,chrom2,CT,line1_list[6],"S","Dups"]
                 elif "Invs" in cat:
                     if CT not in invs:
                         invs[CT]={}
@@ -191,7 +191,7 @@ def read_svaba(File,mode,all_chromo):
                         invs[CT][chrom1]={}
                     if chrom2 not in invs[CT][chrom1]:
                         invs[CT][chrom1][chrom2]={}
-                    invs[CT][chrom1][chrom2][pos1]=[pos1,pos2,chrom2,CT,"S","Invs"]
+                    invs[CT][chrom1][chrom2][pos1]=[pos1,pos2,chrom2,CT,line1_list[6],"S","Invs"]
             if "Trans" in cat and chrom1 in all_chromo and chrom2 in all_chromo:
                 if CT not in trans:
                     trans[CT]={}
@@ -199,7 +199,7 @@ def read_svaba(File,mode,all_chromo):
                     trans[CT][chrom1]={}
                 if chrom2 not in trans[CT][chrom1]:
                     trans[CT][chrom1][chrom2]={}
-                trans[CT][chrom1][chrom2][pos1]=[pos1,pos2,chrom2,CT,"S","Trans"]
+                trans[CT][chrom1][chrom2][pos1]=[pos1,pos2,chrom2,CT,line1_list[6],"S","Trans"]
     return [dels,dups,invs,trans]
 
 def find_oppOrient(orient):
@@ -230,7 +230,7 @@ def check_opp(chrom1,posA,chrom2,posB, orient, window, DictOpp, done):
             count+=1
             value=DictOrientOpp[PosBCompare]
             if count==1:
-                tmpDelly, tmpLumpy, tmpSvaba=['NA']*6, ['NA']*5, ['NA']*5
+                tmpDelly, tmpLumpy, tmpSvaba=['NA']*6, ['NA']*5, ['NA']*6
             if PosBCompare < posB-window:
                 continue
             elif PosBCompare in range(posB-window, posB+window) and chrom1==value[2] and value[1] in range(posA-window, posA+window):
@@ -261,6 +261,8 @@ def check_opp(chrom1,posA,chrom2,posB, orient, window, DictOpp, done):
                     tmpSvaba[2]=str(tmpSvaba[2])+";"+str(value[1])
                     tmpSvaba[3]=str(tmpSvaba[3])+";"+str(value[2])
                     tmpSvaba[4]=str(tmpSvaba[4])+";"+str(value[3])
+                    if 'PASS' in tmpSvaba[5] or 'PASS' in value:
+                        tmpSvaba[5]="PASS"
                 if LEN==count:
                     return tmpDelly,tmpLumpy,tmpSvaba,done
             elif PosBCompare > posB+window:
@@ -277,7 +279,7 @@ def joinCalls_trans(List, chromo1, chromo2, orient1, DictOpp_delly, DictOpp_lump
                 tmpExtras=[chromo1, pos1, str(chrom2)+":"+str(pos2), call[-1], 0, call[3]]
             else:
                 tmpExtras=[chromo1, pos1, str(chrom2)+":"+str(pos2), call[-1], int(call[1])-int(call[0])+1, call[3]]
-            tmpDelly, tmpLumpy, tmpSvaba=['NA']*6, ['NA']*5, ['NA']*5
+            tmpDelly, tmpLumpy, tmpSvaba=['NA']*6, ['NA']*5, ['NA']*6
             if 'D' in call:
                 tmpDelly=[chromo1]+call[0:-2]
             elif 'L' in call:
@@ -319,6 +321,8 @@ def joinCalls_trans(List, chromo1, chromo2, orient1, DictOpp_delly, DictOpp_lump
                                 tmpSvaba[2]=str(tmpSvaba[2])+";"+str(callN[1])
                                 tmpSvaba[3]=str(tmpSvaba[3])+";"+str(callN[2])
                                 tmpSvaba[4]=str(tmpSvaba[4])+";"+str(callN[3])
+                                if 'PASS' in tmpSvaba[5] or 'PASS' in callN:
+                                    tmpSvaba[5]="PASS"
                             if svtype=="Trans":
                                 OppD=check_opp(chrom1, pos1, chrom2, pos2, orient, int(window), DictOpp_delly, done)
                                 OppL=check_opp(chrom1, pos1, chrom2, pos2, orient, int(window), DictOpp_lumpy, done)
@@ -353,6 +357,8 @@ def joinCalls_trans(List, chromo1, chromo2, orient1, DictOpp_delly, DictOpp_lump
                                     tmpSvaba[2]=str(tmpSvaba[2])+";"+str(OppS[2][2])
                                     tmpSvaba[3]=str(tmpSvaba[3])+";"+str(OppS[2][3])
                                     tmpSvaba[4]=str(tmpSvaba[4])+";"+str(OppS[2][4])
+                                    if 'PASS' in tmpSvaba[5] or 'PASS' in OppS[2][5]:
+                                        tmpSvaba[5]="PASS"
                                 elif OppS!=None and OppS[2][1]!='NA' and tmpSvaba[1]=='NA':
                                     tmpSvaba=OppS[2]
                             if j+1==len(List):
@@ -394,6 +400,8 @@ def joinCalls_trans(List, chromo1, chromo2, orient1, DictOpp_delly, DictOpp_lump
                                 tmpSvaba[2]=str(tmpSvaba[2])+";"+str(OppS[2][2])
                                 tmpSvaba[3]=str(tmpSvaba[3])+";"+str(OppS[2][3])
                                 tmpSvaba[4]=str(tmpSvaba[4])+";"+str(OppS[2][4])
+                                if 'PASS' in tmpSvaba[5] or 'PASS' in OppS[2][5]:
+                                    tmpSvaba[5]="PASS"
                             elif OppS!=None and OppS[2][1]!='NA' and tmpSvaba[1]=='NA':
                                 tmpSvaba=OppS[2]
                         MergedList= MergedList+[tmpExtras+tmpDelly+tmpLumpy+tmpSvaba]
@@ -514,7 +522,6 @@ if __name__=='__main__':
     parser.add_argument('-lumpy','--lumpy',help="enter full path for lumpy vcf file")
     parser.add_argument('-svaba','--svaba',help="enter full path for svaba vcf file")
     parser.add_argument('-frag','--frag',help="enter size of fragment or window in which breakpoint would be integrated", type=int)
-    # parser.add_argument('-result','--out',help="enter full path of file to write for result")
     parser.add_argument('-outdir','--outdir',help="enter path of output directory")
     parser.add_argument('-mode','--mode',help="germline or somatic")
     parser.add_argument('-finalFile','--finalFile',help="enter name of file to write with combined results")
@@ -529,7 +536,7 @@ if __name__=='__main__':
     extras=['chrom1','pos1','chrom2:pos2','SVType','Size', 'Orientation']
     columnsD=['DellyChrom1','DellyStart','DellyEnd','DellyChromo2','DellyOrientation','DellyFilter']
     columnsL=['LumpyChrom1','LumpyStart','LumpyEnd','LumpyChromo2','LumpyOrientation']
-    columnsS=['SvabaChrom1','SvabaStart','SvabaEnd','SvabaChromo2','SvabaOrientation']
+    columnsS=['SvabaChrom1','SvabaStart','SvabaEnd','SvabaChromo2','SvabaOrientation', 'SvabaFilter']
     columnsAll=extras+ columnsD+ columnsL + columnsS
     CombinedDF=pd.DataFrame(CombinedSV,columns= columnsAll)
     CombinedDF.to_csv(args.finalFile, sep=",", index=False)

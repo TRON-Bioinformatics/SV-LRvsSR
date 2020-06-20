@@ -13,7 +13,7 @@ def id_generator(size=10, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
 
 def find_seq(chromo, pos1, pos2, strand, reference):
-    result=subprocess.Popen(['python','/home/ricsethi/ROC/integrate/linkedReads/twobit.py',str(reference),str(chromo),str(max(pos1,1)),str(pos2),str(strand)], stdout=subprocess.PIPE)
+    result=subprocess.Popen(['python','/flash/home/ricsethi/twobit.py',str(reference),str(chromo),str(max(pos1,1)),str(pos2),str(strand)], stdout=subprocess.PIPE)
     out=result.communicate()[0].rstrip('\n')
     result.stdout.close()
     return out
