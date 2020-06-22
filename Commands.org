@@ -47,10 +47,14 @@ python Integrate_Final.py -chromLengths chromInfo_hg38.txt -delly DEL_tumor.vcf,
 ** Command
 python Combine_SR_LR_Final.py -SR Combined.csv -LR1 /longRanger/dels.vcf.gz -LR2 /longRanger/large_svs.vcf.gz -w 500
 * Add NAIBR and GROC-SV calls
+** Input files
+1. SV calls from NAIBR: NAIBR_SVs.bedpe
+2. SV calls from GROC-SV: svs_final.vcf
+3. File from previous step: Combined_SR_LR.csv
 python Add_NAIBR_GROCSV.py -NAIBR /NAIBR/NAIBR_SVs.bedpe -w 500 -GROCSV /GROC-SV/results/PostprocessingStep/svs_final.vcf -File Combined_SR_LR_500.csv
 * Perform requantification of SVs with reads sequenced from cWGS(SR) and 10XWGS(LR)
 ** Input files
-1. File containing combined SV from cWGS and 10XWGS technology: Combined_SR_LR_500.csv
+1. File containing combined SV from cWGS and 10XWGS technology: Combined_SR_LR_500_NAIBR_GROC.csv
 2. Tab delimited file containing chromosome name and lengths of chromsomes: chromInfo_hg38.txt
 3. 2bit file for reference genome: hg38.2bit
 ** Command
