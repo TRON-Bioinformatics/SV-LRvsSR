@@ -1,41 +1,77 @@
-require(caret)     
+### Training and testing of 10XWGS model
+require(caret) 
 library(dplyr)
-library(DMwR) 
-library(purrr)
-require(readr)
+library(plyr)
+library(tidyverse)
 
-Tog<- read.csv("MCF7_Final_call.tsv", sep='\t', header=T,
+### read file containing all the features (SupplementaryTable3 )
+Tog<- read.csv("SupplementaryTable3.tsv", sep='\t', header=T,
                stringsAsFactors = F, na.strings = c("","NA"," ",NA,NaN))
 
 ### prepare data for features
 Tog<- Tog %>% 
-  filter(!((SVType=="Invs" & Size< 10000) | (SVType=="Dups" & Size <10000))) %>% 
   filter(Size>50|Size==0) %>% 
-  filter(Linked_SVType!='UNK'|is.na(Linked_SVType)) %>% 
   filter(Predicted_by %in% c("Common","Only 10XWGS"))
 colnames(Tog)[which(colnames(Tog)=="Predicted_by")]<-"Category"
+Tog$Internal<-NA
+Tog$Internal[grep("Internal", Tog$Comment)]<- "Internal"
+Tog$Study1<-NA
+Tog$Study1[grep("Weaver", Tog$Comment)]<- "Study1"
+Tog$Study2<-NA
+Tog$Study2[grep("Hillmer", Tog$Comment)]<- "Study2"
 sample<-"MCF7"
 
-prepareDF<- function(Tog){
-File<- Tog %>% 
-  dplyr::select("GEM","Norm_JR_LR","Norm_SP_LR","Size","PCR",
-         "Category","SVType")
-File$JRS_LR=log2(File$Norm_JR_LR + File$Norm_SP_LR +1)
-File$Norm_JR_LR<- log2(File$Norm_JR_LR+1)
-File$Norm_SP_LR<- log2(File$Norm_SP_LR+1)
-File$SVType<- as.factor(File$SVType)
-File$Category<- as.factor(File$Category)
-File$GEM<- log2(File$GEM+1)
-colnames(File)<-c("GEM","JR_LR","SP_LR","Size","PCR","Category", "SVType", 
-                  "JRS_LR")
-File$PCR[File$PCR=="FALSE"]<-"Negative"
-File$PCR[File$PCR=="TRUE"]<-"Positive"
-File$PCR<- factor(File$PCR, levels=c("Negative","Positive"))
-return(File)
-}
+### prepare data for training
+ForTraining<- Tog %>% 
+  dplyr::filter(!is.na(Validation) & !is.na(Internal)) %>% 
+  dplyr::mutate(SVType = factor(SVType, levels=c("Dels","Dups","Invs","Trans")),
+                Category = factor(Category),
+                Norm_JR_LR = log2(Norm_JR_LR +1),
+                Norm_SP_LR = log2(Norm_SP_LR +1),
+                JRS= log2(Norm_JR_LR + Norm_SP_LR +1),
+                LocalCoverage_Pos1 = log2(LocalCoverage_Pos1_LR +1),
+                LocalCoverage_Pos2 = log2(LocalCoverage_Pos2_LR +1),
+                PCR = ifelse(Validation=="TRUE", "Positive", "Negative"),
+                GEM = log2(GEM +1),
+                Size = log10(Size+1)) %>% 
+  dplyr::mutate(PCR = factor(PCR, levels = c("Negative", "Positive"))) %>% 
+  dplyr::select(Norm_JR_LR, Norm_SP_LR, JRS, PCR, SVType, Category, LocalCoverage_Pos1, LocalCoverage_Pos2, GEM, Size) %>% 
+  dplyr::rename(JR_LR = Norm_JR_LR, SP_LR = Norm_SP_LR)
 
-ForTraining<- prepareDF(filter(Tog, !is.na(PCR)))
-ForPrediction<- prepareDF(filter(Tog, is.na(PCR)))
+### prepare data for prediction
+ForPrediction<- Tog %>% 
+  dplyr::filter(is.na(Internal)) %>% 
+  dplyr::mutate(SVType = factor(SVType, levels=c("Dels","Dups","Invs","Trans")),
+                Category = factor(Category),
+                Norm_JR_LR = log2(Norm_JR_LR +1),
+                Norm_SP_LR = log2(Norm_SP_LR +1),
+                JRS= log2(Norm_JR_LR + Norm_SP_LR +1),
+                LocalCoverage_Pos1 = log2(LocalCoverage_Pos1_LR +1),
+                LocalCoverage_Pos2 = log2(LocalCoverage_Pos2_LR +1),
+                PCR = ifelse(Validation=="TRUE", "Positive", "Negative"),
+                GEM = log2(GEM +1),
+                Size = log10(Size+1)) %>% 
+  dplyr::mutate(PCR = factor(PCR, levels = c("Negative", "Positive"))) %>% 
+  dplyr::select(Norm_JR_LR, Norm_SP_LR, JRS, PCR, SVType, Category, LocalCoverage_Pos1, LocalCoverage_Pos2, GEM, Size) %>% 
+  dplyr::rename(JR_LR = Norm_JR_LR, SP_LR = Norm_SP_LR)
+
+prepareDF<- function(DF){
+  DF<- DF %>% 
+    dplyr::mutate(SVType = factor(SVType, levels=c("Dels","Dups","Invs","Trans")),
+                  Category = factor(Category),
+                  Norm_JR_LR = log2(Norm_JR_LR +1),
+                  Norm_SP_LR = log2(Norm_SP_LR +1),
+                  JRS= log2(Norm_JR_LR + Norm_SP_LR +1),
+                  LocalCoverage_Pos1 = log2(LocalCoverage_Pos1_LR +1),
+                  LocalCoverage_Pos2 = log2(LocalCoverage_Pos2_LR +1),
+                  PCR = ifelse(Validation=="TRUE", "Positive", "Negative"),
+                  GEM = log2(GEM +1),
+                  Size = log10(Size +1)) %>% 
+    dplyr::mutate(PCR = factor(PCR, levels = c("Negative", "Positive"))) %>% 
+    dplyr::select(Norm_JR_LR, Norm_SP_LR, JRS, PCR, SVType, Category, LocalCoverage_Pos1, LocalCoverage_Pos2, GEM, Size) %>% 
+    dplyr::rename(JR_LR = Norm_JR_LR, SP_LR = Norm_SP_LR)
+  return(DF)
+}
 
 ### plot number of positive and negative class samples in training data
 plotData<- function(DF, NameFile){
@@ -71,11 +107,12 @@ cal_result<- function(Training_LR, Testing_LR, train.control){
                      data = Training_LR,
                      method = "glm", maximize=TRUE,metric="ROC",
                      trControl= train.control)
-  summary(model_fit)
+  Imp <- varImp(model_fit)$importance %>% as.data.frame() %>% rownames_to_column(var="Features")
+  
   Modelpredict<-predict(model_fit, Testing_LR, type="prob")
   Modelpredict<- cbind(Modelpredict, SVType=Testing_LR$SVType)
   Model2_predict<- Modelpredict %>% 
-    mutate(pred_class=ifelse(Positive>0.75,"Positive","Negative"))
+    mutate(pred_class=ifelse(Positive>0.6,"Positive","Negative"))
   conf<-table(Predicted=Model2_predict$pred_class, Reference=Testing_LR$PCR)
   Table<- confusionMatrix(conf, positive = "Positive", mode = "everything")
   Result<- c(Table$byClass['Sensitivity'], Table$byClass['Specificity'], Table$byClass['Precision'], 
@@ -83,12 +120,12 @@ cal_result<- function(Training_LR, Testing_LR, train.control){
   Parameter<-c("Sensitivity","Specificity","Precision","F1","Accuracy")
   DF_Result<- data.frame(Parameter=factor(Parameter),
                          Values=Result)
-  return(list(model_fit,DF_Result))
+  return(list(model_fit, DF_Result, Imp))
 }
 
 Modeling<-function(TrainingSet, samplingType){
   DF_Result<- data.frame()
-  DataLR<-TrainingSet[,c("GEM","JR_LR","SP_LR","SVType", "PCR")]  
+  DataLR<-TrainingSet[,c("GEM","JR_LR","SP_LR","SVType", "PCR", "Size", "LocalCoverage_Pos1", "LocalCoverage_Pos2")]  
   train.control<- trainControl(method="repeatedcv",
                                number=10,
                                repeats=3,
@@ -96,6 +133,7 @@ Modeling<-function(TrainingSet, samplingType){
                                summaryFunction = twoClassSummary,
                                savePredictions= TRUE)
   set.seed(1256)
+  Importance<-data.frame()
   for (repeats in 1:10){
     DataLR<- DataLR[sample(nrow(DataLR)),]
     intrain_LR<- createDataPartition(y=DataLR$PCR, p=0.7, list=FALSE)
@@ -107,12 +145,37 @@ Modeling<-function(TrainingSet, samplingType){
       }
     NewResult<- cal_result(Training_LR, Testing_LR, train.control)
     DF_Result<- rbind(DF_Result, NewResult[[2]])
+    Importance<- rbind.fill(Importance, NewResult[[3]])
   }
-  return(list(NewResult[[1]], DF_Result))
+  return(list(NewResult[[1]], DF_Result, Importance))
   }
 
 ### Train logistic regression model
 Normal<- Modeling(ForTraining, "none")
+
+### plot feature importance plot
+df2<- Normal[[3]] %>% 
+  dplyr::group_by(Features) %>% 
+  dplyr::summarise(Mean = mean(Overall),
+                   SD = sd(Overall),
+                   Count = n(),
+                   SE = sd(Overall)/sqrt(n()))
+
+df2$Features<- gsub("JR_LR", "Junction\nreads", df2$Features)
+df2$Features<- gsub("LocalCoverage_Pos1", "Local\ncoverage\nPos1", df2$Features)
+df2$Features<- gsub("LocalCoverage_Pos2", "Local\ncoverage\nPos2", df2$Features)
+df2$Features<- gsub("SP_LR", "Spanning\npairs", df2$Features)
+df2$Features<- gsub("SVTypeDups","Dups", df2$Features)
+df2$Features<- gsub("SVTypeInvs","Invs", df2$Features)
+df2$Features<- gsub("SVTypeTrans","Trans", df2$Features)
+p<- ggplot(df2, aes(x = Features, y = Mean))+
+  geom_col()+
+  geom_errorbar(aes(ymin = Mean - SD, ymax = Mean + SD), width=0.2) +
+  theme_bw() + 
+  theme(axis.text = element_text(size = 10),
+        axis.title = element_text(size = 12)) +
+  labs(y="% Feature importance")
+p+ ggsave("LR_Feature_Imp.png", dpi=600, width = 6, height = 4)
 
 ### plot performance of trained model
 Results<- as.data.frame(Normal[[2]])
@@ -147,7 +210,7 @@ p1<- ggplot(FinalDF, aes(x=Parameter, y=Values, fill=Parameter))+
         legend.text = element_blank(),
         legend.position = "none") +
   scale_y_continuous(limits = c(0,1), breaks = c(0,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8,0.85,0.9,0.95,1))
-p1 + ggsave("MCF7_performance_LR.png", width=5, height = 4)
+p1 + ggsave("10XWGSModel_performance.png", width=5, height = 4)
 
 ### Final model trained on complete data set
 train.control<- trainControl(method="repeatedcv",
@@ -156,12 +219,11 @@ train.control<- trainControl(method="repeatedcv",
                              classProbs=TRUE,
                              summaryFunction = twoClassSummary,
                              savePredictions= TRUE)
-FinalModel <- train(PCR ~ GEM+JR_LR+SP_LR+SVType,
+FinalModel <- train(PCR ~ GEM+JR_LR+SP_LR+SVType+Size+LocalCoverage_Pos1+LocalCoverage_Pos2,
                    data = ForTraining,
                    method = "glm", maximize=TRUE,metric="ROC",
                    trControl= train.control)
 write_rds(FinalModel,"LR_Model.rds") # the traned model for 10XWGS technology
-FinalModel<- read_rds("LR_Model.rds")
 
 ### predict all labels for remaining SVs
 ApplyModel<- function(ForPrediction, Model, sample, tech, samplingType){
@@ -169,7 +231,8 @@ ApplyModel<- function(ForPrediction, Model, sample, tech, samplingType){
                        ForPrediction,
                        type = "prob")
   ForPrediction<- cbind(ForPrediction, pred_class=DF_predict$Positive)
-  ForPrediction<- mutate(ForPrediction, PredictionLR=ifelse(pred_class>0.75,"Positive","Negative"))
+  ForPrediction<- mutate(ForPrediction, PredictionLR=ifelse(Category=="Common", "Positive",
+                                                                   ifelse(pred_class>0.6,"Positive","Negative")))
   ForPrediction$SVType<- as.character(ForPrediction$SVType)
   ForPrediction$SVType[ForPrediction$SVType=="Dels"]<-"Deletion"
   ForPrediction$SVType[ForPrediction$SVType=="Dups"]<-"Duplication"
@@ -188,42 +251,24 @@ ApplyModel<- function(ForPrediction, Model, sample, tech, samplingType){
     geom_bar(stat="identity")+
     scale_fill_brewer(palette = "Paired")+
     theme_bw()+
-    theme(legend.position = "bottom",
-          legend.text = element_text(size=10),
+    theme(legend.position = "none",
           plot.title = element_text(size=10,hjust = 0.5, face = "bold"),
           axis.text = element_text(size=10),
-          axis.title = element_text(size=10,face="bold")) +
+          axis.title = element_text(size=12,face="bold")) +
     labs(x="Predicted SV", y="Counts")+  
     geom_text(data=filter(Count_Table, PredictionLR=="Positive"),
               aes(x= SVType, y= Count, label=paste(round(Percent,2),"%",sep='')),
-              size=3, hjust=0.5, vjust=-0.2 ) +
+              size=4, hjust=0.5, vjust=-0.2 ) +
     annotate("text", x=c(1,2,3,4), y=max(Table2$Count)+500, label=paste("N=",Table2$Count,sep=''))+
-    ggtitle(paste(sample,": ", tech," decision tree predictions", sep=''))
-  p1<-p1 + ggsave(paste(sample,"_",tech,"_",samplingType,"_predictions.png",sep=''), width=4.5, height = 5)
+    ggtitle(paste(sample,":Combined model prediction for 10XWGS SVs", sep=''))
+  p1<-p1 + ggsave(paste(sample,"_",tech,"_",samplingType,"_predictions_combined.png",sep=''), width=4.5, height = 5)
   return(ForPrediction$PredictionLR)  
 }
 
-NormalLR<-ApplyModel(prepareDF(Tog), FinalModel, sample = "MCF7", tech = "10XWGS", samplingType = "Normal")
+NormalLR<-ApplyModel(prepareDF(Tog), FinalModel, sample = "MCF7", tech = "10XWGS", 
+                     samplingType = "Normal")
 
-### Prediction of labels for primary tumor's structural variations
-TogTumor<- read.csv("Primary_tumor_Final_calls.tsv", sep='\t', header=T,
-                    stringsAsFactors = F, na.strings = c("","NA"," ",NA,NaN))
-TogTumor<- TogTumor %>% 
-  filter(!((SVType=="Invs" & Size< 10000) | (SVType=="Dups" & Size <10000))) %>% 
-  filter(Size>50|Size==0) %>% 
-  filter(Linked_SVType!='UNK'|is.na(Linked_SVType)) %>% 
-  filter(Predicted_by %in% c("Common","Only 10XWGS"))
-TogTumor$JRS_LR=log2(TogTumor$Norm_JR_LR + TogTumor$Norm_SP_LR +1)
-TogTumor$Norm_JR_LR<- log2(TogTumor$Norm_JR_LR+1)
-TogTumor$Norm_SP_LR<- log2(TogTumor$Norm_SP_LR+1)
-TogTumor$SVType<- as.factor(TogTumor$SVType)
-colnames(TogTumor)[which(colnames(TogTumor)=="Predicted_by")]<-"Category"
-TogTumor$Category<- as.factor(TogTumor$Category)
-TogTumor$GEM<- log2(TogTumor$GEM+1)
+### write prediction for all SV calls
+write.table(cbind(Tog, `10XWGS_Prediction`=NormalLR), "10XWGS_Predictions.tsv",sep='\t',
+                      quote=F, row.names = F)
 
-NormalLR_Tumor<-ApplyModel(TogTumor, FinalModel, sample = "Primary tumor", tech = "10XWGS", samplingType = "Normal")
-
-write.table(cbind(Tog, Prediction=NormalLR), "10XWGS_Predictions.tsv",sep='\t',
-          quote=F, row.names = F)
-write.table(cbind(TogTumor, Prediction=NormalLR_Tumor), "Tumor_10XWGS_Predictions.tsv",sep='\t',
-            quote=F, row.names = F)
