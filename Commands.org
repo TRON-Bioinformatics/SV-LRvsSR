@@ -26,7 +26,17 @@ lumpyexpress -B sample.sortedCO.bam -D sample.discord.sortedCO.bam -S sample.spl
 1. svaba run -t sample.sortedCO.bam -p 20 -G ref_genome -a tumor --all-contigs
 2. grep -v \"^#\" tumor.svaba.unfiltered.sv.vcf |sort -nk3 > tumor.svaba.sort.sv.vcf
 ** Long Ranger
-longranger wgs --id=Sample_Linked --sample=sample --fastqs=fastq_folder/ --reference=/human/refdata-GRCh38-2.1.0/ --lanes=1,2 --indices=SI-GA-D10 --vcmode=freebayes --somatic --localcores=20 --localmem=20
+longranger wgs \
+--id=Sample_Linked\
+--sample=sample\
+--fastqs=fastq_folder/ \
+--reference=/human/refdata-GRCh38-2.1.0/ \
+--lanes=1,2 \
+--indices=SI-GA-D10 \
+--vcmode=freebayes \
+--somatic \
+--localcores=20 \
+--localmem=20
 ** NAIBR
 python NAIBR.py example.config
 ** GROC-SV
@@ -38,22 +48,51 @@ grocsvs --multiprocessing config.json
 3. Lumpy vcf file: tumor.vcf
 4. SvABA vcf file: tumor.svaba.sort.sv.vcf
 ** Command
-python Integrate_Final.py -chromLengths chromInfo_hg38.txt -delly DEL_tumor.vcf,DUP_tumor.vcf,INV_tumor.vcf,TRA_tumor.vcf -lumpy tumor.vcf -svaba tumor.svaba.sort.sv.vcf -frag 500 -outdir . -mode germline -finalFile Combined.csv
+python Integrate_Final.py \
+-chromLengths chromInfo_hg38.txt \
+-delly DEL_tumor.vcf,DUP_tumor.vcf,INV_tumor.vcf,TRA_tumor.vcf \
+-lumpy tumor.vcf \
+-svaba tumor.svaba.sort.sv.vcf \
+-frag 500 \
+-outdir . \
+-mode germline \
+-finalFile Combined.csv
 * Add Long Ranger calls to short read calls
 ** Input files
 1. SV calls integrated from short-reads SV prediction tools: Combined.csv
 2. Small sized deletion calls from Long Ranger: dels.vcf.gz
 3. Large sized calls from Long Ranger: large_svs.vcf.gz
 ** Command
-python Combine_SR_LR_Final.py -SR Combined.csv -LR1 /longRanger/dels.vcf.gz -LR2 /longRanger/large_svs.vcf.gz -w 500
+python Combine_SR_LR_Final.py \
+-SR Combined.csv \
+-LR1 /longRanger/dels.vcf.gz \
+-LR2 /longRanger/large_svs.vcf.gz \
+-w 500
 * Add NAIBR and GROC-SV calls
-python Add_NAIBR_GROCSV.py -NAIBR /NAIBR/NAIBR_SVs.bedpe -w 500 -GROCSV /GROC-SV/results/PostprocessingStep/svs_final.vcf -File Combined_SR_LR_500.csv
+python Add_NAIBR_GROCSV.py \
+-NAIBR /NAIBR/NAIBR_SVs.bedpe \
+-w 500 \
+-GROCSV /GROC-SV/results/PostprocessingStep/svs_final.vcf \
+-File Combined_SR_LR_500.csv
 * Perform requantification of SVs with reads sequenced from cWGS(SR) and 10XWGS(LR)
 ** Input files
 1. File containing combined SV from cWGS and 10XWGS technology: Combined_SR_LR_500.csv
-2. Tab delimited file containing chromosome name and lengths of chromsomes: chromLength
+2. Tab delimited file containing chromosome name and lengths of chromsomes: chromInfo_hg38.txt
 ** Command
-python Requantification_Final.py -inputFile Combined_SR_LR_500_NAIBR_GROCSV.csv -out Combined_SR_LR_500_requant.tsv -refBit hg38.2bit -area 500 -Read1_SR SR_R1_downsampled.fastq -Read2_SR SR_R2_downsampled.fastq -Read1_LR LR_R1_125.fastq -Read2_LR LR_R2_125.fastq -outdir out -tmpdir temp -cutoff 15 -n 10 -lengths chromLength
+python Requantification_Final.py \
+-inputFile Combined_SR_LR_500_NAIBR_GROCSV.csv \
+-out Combined_SR_LR_500_requant.tsv \
+-refBit hg38.2bit \
+-area 500 \
+-Read1_SR SR_R1_downsampled.fastq \
+-Read2_SR SR_R2_downsampled.fastq \
+-Read1_LR LR_R1_125.fastq \
+-Read2_LR LR_R2_125.fastq \
+-outdir out \
+-tmpdir temp \
+-cutoff 15 \
+-n 10 \
+-lengths chromInfo_hg38.txt
 * Perform GEM quantification for SVs from both cWGS and 10XWGS technology
 ** Input files
 1. File containing combined calls from both the technologies:  Combined_SR_LR_500_requant.tsv
@@ -66,13 +105,24 @@ python Requantification_Final.py -inputFile Combined_SR_LR_500_NAIBR_GROCSV.csv 
 4. sambamba sort --tmpdir=tmp -t 30 -p -o sample.discord.sortedCO.bam sample.discord.bam &
 5. sambamba index -t 10 sample.discord.sortedCO.bam
 *** Calculate GEMs supporting SVs
-python GEM_Final.py -inputFile Combined_SR_LR_500_requant.tsv -bam sample.discord.sortedCO.bam -n 40 -out Combined_SR_LR_requant_GEM.tsv -w 5000
+python GEM_Final.py \
+-inputFile Combined_SR_LR_500_requant.tsv \
+-bam sample.discord.sortedCO.bam \
+-n 40 \
+-out Combined_SR_LR_requant_GEM.tsv \
+-w 5000
 * Add annotations to the breakpoints
 - Annotates breakpoints with repeat region from Repeat Masker file, include unique or ambiguous mapping region and calculates local coverage across breakpoints.
 ** Input files
-1. RepeatMasker file
-2. Mappability region
-3. BAM file for aligned short-reads
-4. BAM file for aligned linked-reads
+1. RepeatMasker file: RepeatMasker_hg38.bed
+2. Mappability region: k100.umap.bed
+3. BAM file for aligned short-reads: sample.sortedCO.bam
+4. BAM file for aligned linked-reads: phased_possorted_bam.bam
 ** Command
-python Include_annotations.py -repeatMasker RepeatMasker_hg38.bed -mappability k100.umap.bed -File Combined_SR_LR_requant_GEM.tsv -Threads 10 -BAM sample.sortedCO.bam -BAMLinked phased_possorted_bam.bam
+python Include_annotations.py \
+-repeatMasker RepeatMasker_hg38.bed \
+-mappability k100.umap.bed \
+-File Combined_SR_LR_requant_GEM.tsv \
+-Threads 10 \
+-BAM sample.sortedCO.bam \
+-BAMLinked phased_possorted_bam.bam
