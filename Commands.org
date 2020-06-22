@@ -26,7 +26,7 @@ lumpyexpress -B sample.sortedCO.bam -D sample.discord.sortedCO.bam -S sample.spl
 1. svaba run -t sample.sortedCO.bam -p 20 -G ref_genome -a tumor --all-contigs
 2. grep -v \"^#\" tumor.svaba.unfiltered.sv.vcf |sort -nk3 > tumor.svaba.sort.sv.vcf
 ** Long Ranger
-longranger wgs \n
+longranger wgs /n
 --id=Sample_Linked\n
 --sample=sample\n
 --fastqs=fastq_folder/ \n
