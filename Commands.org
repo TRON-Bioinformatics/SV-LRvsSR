@@ -33,7 +33,7 @@ python NAIBR.py example.config
 grocsvs --multiprocessing config.json
 * Integrating SV calls from Delly, Lumpy and SvABA
 ** Input files
-1. chromosome lengths: /flash/home/ricsethi/hg19_hg38_arms/chromInfo_hg38.txt
+1. chromosome lengths: chromInfo_hg38.txt
 2. Delly vcf files: DEL_tumor.vcf, DUP_tumor.vcf, INV_tumor.vcf, TRA_tumor.vcf
 3. Lumpy vcf file: tumor.vcf
 4. SvABA vcf file: tumor.svaba.sort.sv.vcf
