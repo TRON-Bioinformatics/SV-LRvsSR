@@ -2,7 +2,7 @@
 
 """
 Author: Riccha Sethi
-Description: Integrating SV calls from delly, lumpy and SvABA
+Description: Integrating SV calls from delly, lumpy and svaba
 """
 
 import argparse
@@ -517,14 +517,14 @@ def read_len(file1):
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description = "Python script to integrate SV calls from Delly, Lumpy and SvABA")
-    parser.add_argument('-chromLengths','--lengthChrom',help="enter tab separated file with first column as chromosome name and second column as length of chromosomes (Required)")
-    parser.add_argument('-delly','--delly',help="enter calls from delly in order:deletion,duplication,inversion,translocation (Required). \n Example: DEL.vcf,DUP.vcf,INV.vcf,TRA.vcf")
-    parser.add_argument('-lumpy','--lumpy',help="enter calls from lumpy (Required)")
-    parser.add_argument('-svaba','--svaba',help="enter calls from SvABA (Required)")
-    parser.add_argument('-frag','--frag',help="enter size of window in which breakpoint would be integrated (default=500)", type=int, default=500)
-    parser.add_argument('-outdir','--outdir',help="enter path of output directory (default=current directory)", default=".", type=str)
-    parser.add_argument('-mode','--mode',help="germline or somatic (default=germline)", default="germline", type=str)
-    parser.add_argument('-finalFile','--finalFile', help="Output file name (Required)")
+    parser.add_argument('-chromLengths','--lengthChrom',help="enter txt file containing length of chromosomes")
+    parser.add_argument('-delly','--delly',help="enter full path for delly vcf files in order:DEL,DUP,INV,TRA")
+    parser.add_argument('-lumpy','--lumpy',help="enter full path for lumpy vcf file")
+    parser.add_argument('-svaba','--svaba',help="enter full path for svaba vcf file")
+    parser.add_argument('-frag','--frag',help="enter size of fragment or window in which breakpoint would be integrated", type=int)
+    parser.add_argument('-outdir','--outdir',help="enter path of output directory")
+    parser.add_argument('-mode','--mode',help="germline or somatic")
+    parser.add_argument('-finalFile','--finalFile',help="enter name of file to write with combined results")
     args=parser.parse_args()
     ### reading files ###
     lenChrom=read_len(args.lengthChrom)
