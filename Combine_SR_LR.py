@@ -456,4 +456,4 @@ if __name__=='__main__':
         FinalFile= pd.concat([AllDels, AllDups, AllInvs, AllTrans], ignore_index=True, sort=False)
         FinalFile= FinalFile.sort_values(by=['chrom1','pos1','chrom2:pos2'])
 
-        FinalFile.to_csv(str(args.outdir)+"/Combined_SR_LR.csv", sep='\t', index=False)
+        FinalFile.to_csv(str(args.outdir)+"/Combined_SR_LR.tsv", sep='\t', index=False)

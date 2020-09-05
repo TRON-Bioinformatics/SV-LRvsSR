@@ -1,0 +1,101 @@
+chrom1	pos1	chrom2:pos2	SVType	Size	Orientation	DellyChrom1	DellyStart	DellyEnd	DellyChromo2	DellyOrientation	DellyFilter	LumpyChrom1	LumpyStart	LumpyEnd	LumpyChromo2	LumpyOrientation	SvabaChrom1	SvabaStart	SvabaEnd	SvabaChromo2	SvabaOrientation	SvabaFilter	Category	Linked_chrom1	Linked_pos1	Linked_chrom2_pos2	Linked_SVType	Linked_Orient	Linked_Filter	Linked_Source	Linked_Size	Linked_Qual	Linked_HapAllelicFrac	Linked_AllelicFrac	Linked_Pairs	Linked_Split	NAIBR_chrom1	NAIBR_Pos1	NAIBR_chrom2	NAIBR_Pos2	NAIBR_Split_molecules	NAIBR_Discordant_reads	NAIBR_Orientation	NAIBR_Haplotype	NAIBR_Score	NAIBR_Filter	NAIBR_Orient	NAIBR_SVType	GROCSV_Filter	GROCSV_Orient	GROCSV_SVType	GROCSV_SupportBarcode	GROCSV_chrom1	GROCSV_chrom2	GROCSV_pos1	GROCSV_pos2	JR_SR	SP_SR	JR_LR	SP_LR
+chr10	4113530	chr5:5595135	Trans	0	3to3												chr10	4113530	5595135	chr5	3to3	NODISC	Only cWGS																																		0	0	0	0
+chr22	48624910	chr22:48625164	Dels	255	3to5																		Only 10XWGS	chr22	48624910	chr22:48625164	Dels	3to5	PASS	LOCAL_ASM	255	14	.	.	.	.																					0	0	2	0
+chr16	46420931	chr9:43320577	Trans	0	5to5												chr16	46420931	43320577	chr9	5to5	LOCALMATCH	Only cWGS																																		0	0	0	0
+chr12	335888	chr18:31915938	Trans	0	5to3												chr12	335888	31915938	chr18	5to3	NODISC	Only cWGS																																		0	0	0	0
+chr14	100670763	chr14:100745719	Invs	74957	3to3																		Only 10XWGS	chr14	100670763	chr14:100745719	Invs	3to3	LOWQ	SV	74957	4	0.137931034	0.014732965	1	0																					3	0	0	0
+chr3	58549044	chr3:58586887	Invs	37844	5to5																		Only 10XWGS	chr3	58549044	chr3:58586887	Invs	5to5	LOWQ	SV	37844	4	0.333333333	0.055555556	1	0																					0	0	0	0
+chrY	11742438	chrY:11748734	Dels	6297	3to5												chrY	11742438	11748734	chrY	3to5	TOOSHORT	Only cWGS																																		0	0	0	0
+chr1	16799160	chr1:234783478	Invs	217984319	3to3																		Only 10XWGS																										ASSEMBLYGAP;NOLONGFRAGS	3to3	Invs	98	chr1	chr1	16799160	234783478	0	36	0	24
+chr12	51498774	chr7:67292900	Trans	0	5to5												chr12	51498774	67292900	chr7	5to5	LOWMAPQ	Only cWGS																																		32	0	17	3
+chr12	95355503	chr20:1026583	Trans	0	5to5												chr12	95355503	1026583	chr20	5to5	LOWMAPQ	Only cWGS																																		0	0	1	0
+chr22	15410080	chr9:40909080	Trans	0	5to3												chr22	15410080	40909080	chr9	5to3	LOCALMATCH	Only cWGS																																		0	0	0	0
+chr2	198575366	chr2:198585738	Invs	10373	5to5												chr2	198575366	198585738	chr2	5to5	LOWMAPQDISC	Only cWGS																																		0	4	0	4
+chr20	61102006	chr20:61102509	Dels	504	3to5																		Only 10XWGS	chr20	61102006	chr20:61102509	Dels	3to5	PASS	LOCAL_ASM	504	54	.	.	.	.																					32	18	31	27
+chr1	47326076	chr14:75157841	Trans	0	3to5												chr1	47326076	75157841	chr14	3to5	NODISC	Only cWGS																																		0	0	0	0
+chr1	203924743	chr1:203925180	Dels	438	3to5	chr1	203924743	203925180	chr1	3to5	PASS												Only cWGS																																		51	9	125	3
+chr21	10379148	chr2:32916598	Trans	0	5to3	chr21	10379148	32916598	chr2	5to3	LowQual												Only cWGS																																		0	0	0	0
+chr1	144103414	chr2:32916283	Trans	0	5to3							chr1	144103414	32916283	chr2	5to3	chr1	144103631	32916547	chr2	5to3	LOWMAPQDISC	Only cWGS																																		0	0	0	0
+chr4	4793830	chr6:165749364	Trans	0	3to3												chr4	4793830	165749364	chr6	3to3	NODISC	Only cWGS																																		0	0	1	0
+chr1	88342202	chr1:89752778	Invs	1410577	5to5	chr1	88342202	89752778	chr1	5to5	LowQual												Only cWGS																																		0	30	0	102
+chr5	173198770	chr5:173198913	Dels	144	3to5												chr5	173198770	173198913	chr5	3to5	LOCALMATCH	Only cWGS																																		0	0	0	0
+chr12	33233572	chr8:108936225	Trans	0	5to3												chr12	33233572	108936225	chr8	5to3	LOWMAPQDISC	Only cWGS																																		0	0	0	2
+chr1	143213150	chr10:42075762	Trans	0	5to3												chr1	143213150	42075762	chr10	5to3	LOCALMATCH	Only cWGS																																		2	0	0	3
+chr11	3442874	chr11:67825603	Dels	64382730	3to5	chr11	3442914	67825555	chr11	3to5	PASS						chr11	3442874	67825603	chr11	3to5	LOWMAPQDISC	Only cWGS																																		0	17	0	21
+chr16	34909562	chr9:43336799	Trans	0	5to3												chr16	34909562	43336799	chr9	5to3	LOCALMATCH	Only cWGS																																		0	0	0	0
+chr21	9096964	chr21:9099198	Dups	2235	5to3	chr21	9096964	9099198	chr21	5to3	PASS						chr21	9096977	9099193	chr21	5to3	LOCALMATCH	Only cWGS																																		0	0	5	0
+chr17	26870623	chr21:10712436	Trans	0	5to5												chr17	26870623	10712436	chr21	5to5	NODISC	Only cWGS																																		0	0	0	0
+chrY	10961456	chrY:10997595	Dels	36140	3to5												chrY	10961456	10997595	chrY	3to5	NODISC	Only cWGS																																		0	0	0	0
+chr16	34627895	chr16:34950584	Dels	322690	3to5												chr16	34627895	34950584	chr16	3to5	NODISC	Only cWGS																																		0	0	0	0
+chr20	28637357	chr20:28646695	Invs	9339	5to5												chr20	28637357	28646695	chr20	5to5	LOWMAPQDISC	Only cWGS																																		0	3	0	5
+chr9	5992489	chr9:6040297	Invs	47809	5to5																		Only 10XWGS	chr9	5992489	chr9:6040297	Invs	5to5	LOWQ	SV	47809	7	0.368421053	0.053061224	1	0																					0	0	0	0
+chr17	75172098	chr17:75172549	Dels	452	3to5																		Only 10XWGS	chr17	75172098	chr17:75172549	Dels	3to5	PASS	.	452	2	1	0.025974026	.	.																					0	2	1	1
+chr16	72585730	chr16:72632175	Invs	46446	5to5																		Only 10XWGS	chr16	72585730	chr16:72632175	Invs	5to5	LOWQ	SV	46446	15	0.340909091	0.072864322	0	1																					0	0	3	0
+chr1	173953993	chr16:7147032	Trans	0	5to5												chr1	173953993	7147032	chr16	5to5	LOWMAPQDISC	Only cWGS																																		5	1	0	0
+chr12	113873693	chr4:152970	Trans	0	3to3												chr12	113873693	152970	chr4	3to3	NODISC	Only cWGS																																		0	0	0	0
+chr10	41893910	chr10:41907626	Dups	13717	5to3	chr10	41893910	41907626	chr10	5to3	LowQual												Only cWGS																																		0	1	0	11
+chr6	95669198	chr8:111870727	Trans	0	3to5												chr6	95669198	111870727	chr8	3to5	NODISC	Only cWGS																																		0	0	0	0
+chr20	28821217	chr7:57992607	Trans	0	3to5												chr20	28821217	57992607	chr7	3to5	LOCALMATCH	Only cWGS																																		0	0	0	0
+chr17	35530553	chr8:10543412	Trans	0	3to3												chr17	35530553	10543412	chr8	3to3	NODISC	Only cWGS																																		6	0	3	0
+chr6	8390523	chrY:11015158	Trans	0	3to5												chr6	8390523	11015158	chrY	3to5	TOOSHORT	Only cWGS																																		0	0	0	0
+chr6	159538415	chrX:48068187	Trans	0	5to3												chr6	159538415	48068187	chrX	5to3	LOCALMATCH	Only cWGS																																		0	0	0	0
+chr20	30978780	chr5:49693627	Trans	0	3to3												chr20	30978780	49693627	chr5	3to3	LOCALMATCH	Only cWGS																																		0	1	1	0
+chrX	148547139	chrX:148547216	Dels	78	3to5																		Only 10XWGS	chrX	148547139	chrX:148547216	Dels	3to5	PASS	LOCAL_ASM	78	32	.	.	.	.																					16	0	3	0
+chr13	34747821	chr1:227532903	Trans	0	5to3	chr13	34747821	227532903	chr1	5to3	LowQual												Only cWGS																																		0	6	0	8
+chr1	143200814	chr1:143255234	Invs	54421	3to3												chr1	143200814	143255234	chr1	3to3	LOCALMATCH	Only cWGS																																		1	109	4	79
+chr21	15381133	chr21:15414290	Invs	33158	5to5																		Only 10XWGS	chr21	15381133	chr21:15414290	Invs	5to5	LOWQ	SV	33158	7	0.5	0.073298429	.	.																					0	0	0	0
+chr1	125169857	chr1:143225193	Invs	18055337	3to3												chr1	125169857	143225193	chr1	3to3	TOOSHORT	Only cWGS																																		0	0	0	1
+chr20	30977499	chr7:57880988	Trans	0	5to3												chr20	30977499	57880988	chr7	5to3	LOCALMATCH	Only cWGS																																		0	0	0	0
+chr18	29924906	chrX:67873962	Trans	0	3to5												chr18	29924906	67873962	chrX	3to5	LOCALMATCH	Only cWGS																																		0	0	0	0
+chr17	21979411	chrY:10647524	Trans	0	3to3												chr17	21979411	10647524	chrY	3to3	TOOSHORT	Only cWGS																																		0	0	0	0
+chr11	48847146	chr8:43963689	Trans	0	3to5												chr11	48847146	43963689	chr8	3to5	LOCALMATCH	Only cWGS																																		0	0	0	0
+chr19	39093157	chrY:17300122	Trans	0	3to3												chr19	39093157	17300122	chrY	3to3	LOCALMATCH	Only cWGS																																		4	0	2	0
+chr2	171513514	chr8:9496740	Trans	0	5to3												chr2	171513514	9496740	chr8	5to3	LOCALMATCH	Only cWGS																																		0	0	0	0
+chr19	16002154	chr19:49954279	Invs	33952126	5to5												chr19	16002154	49954279	chr19	5to5	LOWAS	Only cWGS																																		0	0	0	0
+chr14	95603789	chr19:47792215	Trans	0	5to3												chr14	95603789	47792215	chr19	5to3	NODISC	Only cWGS																																		5	0	3	0
+chr17	24289813	chr17:25353082	Dups	1063270	5to3												chr17	24289813	25353082	chr17	5to3	LOCALMATCH	Only cWGS																																		0	1	0	6
+chr17	25115405	chr17:25788717	Dups	673313	5to3												chr17	25115405	25788717	chr17	5to3	LOWMAPQDISC	Only cWGS																																		0	5	0	28
+chr12	19911479	chr22:11270728	Trans	0	3to3												chr12	19911479	11270728	chr22	3to3	LOCALMATCH	Only cWGS																																		0	0	0	0
+chr13	17553498	chr16:36070891	Trans	0	5to3												chr13	17553498	36070891	chr16	5to3	LOCALMATCH	Only cWGS																																		0	0	0	0
+chr9	2262646	chr9:2301492	Invs	38847	5to5																		Only 10XWGS	chr9	2262646	chr9:2301492	Invs	5to5	LOWQ	SV	38847	8	0.444444444	0.078947368	.	.																					0	0	1	0
+chr11	69885856	chr2:32916502	Trans	0	5to3												chr11	69885856	32916502	chr2	5to3	LOWMAPQDISC	Only cWGS																																		0	2	0	2
+chr13	28346620	chr3:20069649	Trans	0	3to3												chr13	28346620	20069649	chr3	3to3	LOCALMATCH	Only cWGS																																		0	0	0	0
+chr9	40598941	chr9:65812326	Invs	25213386	5to5												chr9	40598941	65812326	chr9	5to5	NODISC	Only cWGS																																		1	2	1	0
+chrX	110448092	chrX:110531250	Invs	83159	3to3																		Only 10XWGS	chrX	110448092	chrX:110531250	Invs	3to3	LOWQ	SV	83159	4	0.181818182	0.023195876	.	.																					0	0	0	0
+chr3	90623134	chr5:50226067	Trans	0	5to3												chr3	90623134	50226067	chr5	5to3	LOCALMATCH	Only cWGS																																		0	0	0	0
+chr4	11468599	chrY:23446779	Trans	0	5to3												chr4	11468599	23446779	chrY	5to3	LOCALMATCH	Only cWGS																																		0	0	0	0
+chr3	90587226	chr7:62569137	Trans	0	3to5												chr3	90587226	62569137	chr7	3to5	LOCALMATCH	Only cWGS																																		0	0	0	0
+chr1	98593048	chrX:104069779	Trans	0	3to3												chr1	98593048	104069779	chrX	3to3	TOOSHORT	Only cWGS																																		0	0	0	0
+chr9	60522137	chr9:60522651	Dups	515	5to3												chr9	60522137;60522211	60522651;60522273	chr9	5to3	LOCALMATCH	Only cWGS																																		0	0	0	0
+chr1	143225243	chr10:42094805	Trans	0	3to5												chr1	143225243	42094805	chr10	3to5	LOWMAPQDISC	Only cWGS																																		0	0	0	0
+chr4	49120208	chrY:10900932	Trans	0	5to3												chr4	49120208	10900932	chrY	5to3	LOCALMATCH	Only cWGS																																		0	0	0	0
+chr3	90291890	chrX:58497679	Trans	0	5to5												chr3	90291890	58497679	chrX	5to5	LOCALMATCH	Only cWGS																																		0	3	0	2
+chr18	7595938	chr18:7628730	Invs	32793	5to5																		Only 10XWGS	chr18	7595938	chr18:7628730	Invs	5to5	LOWQ	SV	32793	10	0.454545455	0.081081081	.	.																					0	0	0	0
+chr4	69220574	chr4:69271874	Invs	51301	5to5	chr4	69220574	69271874	chr4	5to5	LowQual												Only cWGS																																		0	2	0	1
+chr1	2660246	chr1:2688200	Dups	27955	5to3												chr1	2660246	2688200	chr1	5to3	LOCALMATCH	Only cWGS																																		0	0	0	0
+chr5	123622723	chr6:63674287	Trans	0	3to5												chr5	123622723	63674287	chr6	3to5	NODISC	Only cWGS																																		0	0	0	0
+chr14	16104566	chr17:21977776	Trans	0	5to5												chr14	16104566	21977776	chr17	5to5	DUPREADS	Only cWGS																																		0	0	1	0
+chr7	17820909	chr7:17890486	Invs	69578	5to5																		Only 10XWGS	chr7	17820909	chr7:17890486	Invs	5to5	LOWQ	SV	69578	3	0.136363636	0.018421053	1	0																					0	0	0	0
+chr21	5324467	chr21:7221037	Dups	1896571	5to3												chr21	5324467	7221037	chr21	5to3	LOCALMATCH	Only cWGS																																		0	0	0	0
+chrY	10881629	chrY:10946009	Dups	64381	5to3												chrY	10881629	10946009	chrY	5to3	TOOSHORT	Only cWGS																																		0	0	0	0
+chr22	12955697	chr22:12966927	Dups	11231	5to3												chr22	12955697	12966927	chr22	5to3	LOWMAPQDISC	Only cWGS																																		0	8	0	2
+chr19	21005407	chr3:18954421	Trans	0	3to3												chr19	21005407	18954421	chr3	3to3	LOWMAPQ	Only cWGS																																		0	0	0	0
+chr12	131046152	chr12:131046512	Dups	361	5to3												chr12	131046152;131046186	131046512;131046442	chr12	5to3	LOWMAPQDISC	Only cWGS																																		0	0	0	0
+chr1	188751257	chr9:129442973	Trans	0	5to5												chr1	188751257	129442973	chr9	5to5	LOWMAPQ	Only cWGS																																		0	0	0	0
+chr17	13680189	chr17:13680322	Dups	134	5to3							chr17	13680189	13680322	chr17	5to3							Only cWGS																																		0	7	0	1
+chrX	971006	chrX:972005	Dups	1000	5to3												chrX	971006	972005	chrX	5to3	LOCALMATCH	Only cWGS																																		0	0	0	0
+chr10	81535408	chr9:122391344	Trans	0	5to3												chr10	81535408	122391344	chr9	5to3	LOCALMATCH	Only cWGS																																		1	0	2	0
+chr11	26497020	chr4:167904930	Trans	0	3to3												chr11	26497020	167904930	chr4	3to3	LOCALMATCH	Only cWGS																																		2	0	0	0
+chr22	11703976	chr22:12170184	Invs	466209	3to3												chr22	11703976	12170184	chr22	3to3	NODISC	Only cWGS																																		0	0	0	1
+chr5	46518699	chr5:46565307	Dups	46609	5to3												chr5	46518699	46565307	chr5	5to3	DUPREADS	Only cWGS																																		0	0	0	2
+chr13	43351337	chr2:32916421	Trans	0	3to3												chr13	43351337	32916421	chr2	3to3	LOWMAPQDISC	Only cWGS																																		0	2	0	0
+chr8	66232593	chr11:4138046	Trans	0	3to3	chr8	66232593	4138046	chr11	3to3	LowQual												Only cWGS																																		2	9	1	12
+chrY	11010413	chrY:56830050	Dups	45819638	5to3												chrY	11010413	56830050	chrY	5to3	LOCALMATCH	Only cWGS																																		0	0	0	0
+chr17	24510535	chr17:25625067	Dels	1114533	3to5												chr17	24510535	25625067	chr17	3to5	LOCALMATCH	Only cWGS																																		0	0	0	0
+chr14	67890596	chr2:74970312	Trans	0	5to3												chr14	67890596	74970312	chr2	5to3	LOWMAPQDISC	Only cWGS																																		0	1	0	0
+chr8	112158776	chr8:112206015	Invs	47240	5to5																		Only 10XWGS	chr8	112158776	chr8:112206015	Invs	5to5	LOWQ	SV	47240	7	0.233333333	0.046948357	1	0																					0	0	0	0
+chr1	2682905	chr1:2755267	Dels	72363	3to5												chr1	2682905	2755267	chr1	3to5	LOCALMATCH	Only cWGS																																		0	0	0	0
+chr7	61042670	chr7:62307884	Dels	1265215	3to5												chr7	61042670	62307884	chr7	3to5	LOCALMATCH	Only cWGS																																		0	0	0	0
+chr1	143198798	chr1:143233250	Dels	34453	3to5												chr1	143198798	143233250	chr1	3to5	LOWMAPQ	Only cWGS																																		1	0	0	0
+chr17	23688072	chr17:26620176	Dels	2932105	3to5												chr17	23688072	26620176	chr17	3to5	LOCALMATCH	Only cWGS																																		0	1	0	2
+chr5	49362920	chr5:49363264	Dups	345	5to3												chr5	49362920	49363264	chr5	5to3	LOWMAPQDISC	Only cWGS																																		0	1	0	2

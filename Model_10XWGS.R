@@ -6,7 +6,7 @@ library(plyr)
 library(tidyverse)
 
 # Parse commandline arguments --------------------------------------------------
-# options(stringsAsFactors = FALSE)
+options(stringsAsFactors = FALSE)
 
 argument_list <- list(
   make_option(c("-f", "--SVFile"), default="", 
@@ -51,7 +51,6 @@ Tog<- read.csv(opt$SVFile, sep = '\t', header=T, stringsAsFactors = F, na.string
 if ("Category" %in% colnames(Tog)){
   Tog<- Tog %>% 
     dplyr::filter(Size>50|Size==0) %>% 
-    dplyr::filter(Predicted_by %in% c("Common","Only 10XWGS")) %>% 
     dplyr::mutate(JR_LR = log2(((JR_LR/(2*opt$total_reads))*100000000) + 1),
                   SP_LR = log2(((SP_LR/(opt$total_reads))*100000000) + 1),
                   LocalCoverage_Pos1_LR = log2(LocalCoverage_Pos1_LR +1),

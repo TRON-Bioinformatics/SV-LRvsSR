@@ -134,8 +134,8 @@ def split(dfm, chunk_size):
 
 def main():
     parser=argparse.ArgumentParser(description= "A python script to perform requantification for SVs using read-pairs from cWGS and 10XWGS technology")
-    parser.add_argument('-inputFile','--inputFile', help="enter .csv file containing combined calls from short-reads and linked-reads OR containing following columns: chrom1, pos1, chrom2:pos2, SVType and Orientation (Required)")
-    parser.add_argument('-out','--output', help="Output .csv file name (Required)")
+    parser.add_argument('-inputFile','--inputFile', help="enter .tsv file containing combined calls from short-reads and linked-reads OR containing following columns: chrom1, pos1, chrom2:pos2, SVType and Orientation (Required)")
+    parser.add_argument('-out','--output', help="Output .tsv file name (Required)")
     parser.add_argument('-n','--processes', help="enter number of cores to run the process (Default=1)", default=1, type=int)
     parser.add_argument('-refBit','--twoBit', help="enter .2bit file of the reference genome (Required)")
     parser.add_argument('-area','--areaRequant',help="enter area in bp around breakpoints for synthetic genomic template (Default=500)", default=500, type=int)
@@ -145,13 +145,13 @@ def main():
     parser.add_argument('-Read2_LR','--Read2_LR',help="enter read2.fq with barcodes trimmed from 10XWGS (Required)", default=None)
     parser.add_argument('-outdir','--outdir',help="enter output directory (Default=current directory)", default=".", type=str)
     parser.add_argument('-tmpdir','--tmpdir',help="enter path of temporary directory (Default=temp)", default="temp", type=str)
-    parser.add_argument('-cutoff','--junc_cutoff', type=int, help="cutoff for junction reads. a read has to overlap breakpoint with atleast <INT> bases (Default=10)", default=10, type=int)
+    parser.add_argument('-cutoff','--junc_cutoff', type=int, help="cutoff for junction reads. a read has to overlap breakpoint with atleast <INT> bases (Default=10)", default=10)
     parser.add_argument('-lengths','--lenChrom',help="enter file contaning length of chromosomes (Required)")
     return parser.parse_args()
 
 if __name__=='__main__':
     args=main()
-    CombinedFile1=pd.read_csv(args.inputFile)
+    CombinedFile1=pd.read_csv(args.inputFile, sep='\t')
     CombinedFile=CombinedFile1.sample(frac=1).reset_index(drop=True)
     lengths=dict()
     with open(args.lenChrom) as f:

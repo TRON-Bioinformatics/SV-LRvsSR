@@ -539,4 +539,4 @@ if __name__=='__main__':
     columnsS=['SvabaChrom1','SvabaStart','SvabaEnd','SvabaChromo2','SvabaOrientation', 'SvabaFilter']
     columnsAll=extras+ columnsD+ columnsL + columnsS
     CombinedDF=pd.DataFrame(CombinedSV,columns= columnsAll)
-    CombinedDF.to_csv(args.finalFile, sep=",", index=False)
+    CombinedDF.to_csv(args.finalFile, sep="\t", index=False)

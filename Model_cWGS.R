@@ -40,7 +40,6 @@ Tog<- read.csv(opt$SVFile, sep = '\t', header=T, stringsAsFactors = F, na.string
 if ("Category" %in% colnames(Tog)){
   Tog<- Tog %>% 
     dplyr::filter(Size>50|Size==0) %>% 
-    dplyr::filter(Predicted_by %in% c("Common","Only cWGS")) %>% 
     dplyr::mutate(JR_SR = log2(((JR_SR/(2*opt$total_reads))*100000000) + 1),
                   SP_SR = log2(((SP_SR/(opt$total_reads))*100000000) + 1),
                   LocalCoverage_Pos1_SR = log2(LocalCoverage_Pos1_SR +1),

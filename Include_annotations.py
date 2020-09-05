@@ -92,7 +92,7 @@ def annotate(DF, RepMasker, MapFile,BAMT, BAML, bt):
             NewDF.at[index,'RepPos2_Class']= RepeatClass(rows['chrom2'], tmp_f, RepMasker)
         if MapFile:
             tmp_g=check_mappability(rows, MapFile, "breakpoint1")
-            tmp_h=check_mappability(return ows, MapFile, "breakpoint2")
+            tmp_h=check_mappability(rows, MapFile, "breakpoint2")
             NewDF.at[index, 'Mappable_Pos1']=tmp_g
             NewDF.at[index, 'Mappable_Pos2']=tmp_h
     if BAMT:
