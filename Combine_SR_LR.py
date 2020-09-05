@@ -202,7 +202,7 @@ def presentLinked(linked, chrom1, pos1, chrom2, pos2, svtype, orient, window, st
 
 def compare_SR_LR(linked,short, w):
     list1=[]
-    Predicted_by, Linked_chrom1, Linked_pos1, Linked_chrom2_pos2, Linked_SVType, Linked_Orient, Linked_Filter, Linked_Source, Linked_Size, Linked_Qual, Linked_HapAllelicFrac, Linked_AllelicFrac,  Linked_Pairs, Linked_Split =list(), list(), list(), list(), list(), list(), list(), list(), list(), list(), list(), list(), list(), list()
+    Category, Linked_chrom1, Linked_pos1, Linked_chrom2_pos2, Linked_SVType, Linked_Orient, Linked_Filter, Linked_Source, Linked_Size, Linked_Qual, Linked_HapAllelicFrac, Linked_AllelicFrac,  Linked_Pairs, Linked_Split =list(), list(), list(), list(), list(), list(), list(), list(), list(), list(), list(), list(), list(), list()
     TofillList=[Linked_chrom1, Linked_pos1, Linked_chrom2_pos2, Linked_SVType, Linked_Orient, Linked_Filter, Linked_Source, Linked_Size, Linked_Qual, Linked_HapAllelicFrac, Linked_AllelicFrac,  Linked_Pairs, Linked_Split]
     short=short.reindex(range(0, short.shape[0])) # important to re-index so don't exclude it
     for index,row in short.iterrows():
@@ -212,18 +212,18 @@ def compare_SR_LR(linked,short, w):
             if check2==None:
                 for k in TofillList:
                     k.append("NA")
-                Predicted_by.append("Only cWGS")
+                Category.append("Only cWGS")
             else:
                 a=linked[check2[1]][check2[2]][check2[3]].pop(check2[4],None)
                 for k in range(len(TofillList)):
                     TofillList[k].append(check2[0][k])
-                Predicted_by.append("Common")
+                Category.append("Common")
         else:
             b=linked[check1[1]][check1[2]][check1[3]].pop(check1[4],None)
             for k in range(len(TofillList)):
                 TofillList[k].append(check1[0][k])
-            Predicted_by.append("Common")
-    short['Predicted_by']=Predicted_by
+            Category.append("Common")
+    short['Category']=Category
     short['Linked_chrom1']=Linked_chrom1
     short['Linked_pos1']=Linked_pos1
     short['Linked_chrom2_pos2']=Linked_chrom2_pos2
@@ -253,7 +253,7 @@ def compare_SR_LR(linked,short, w):
                         tmp.append(linked[svtype][orient][chrom1][pos1][i-4])
                     tmp.append("Only 10XWGS")
                     list1.append(tmp)
-    header=['chrom1','pos1','chrom2:pos2','SVType', 'Size','Orientation','Linked_chrom1', 'Linked_pos1', 'Linked_chrom2_pos2', 'Linked_SVType', 'Linked_Orient', 'Linked_Filter', 'Linked_Source', 'Linked_Size', 'Linked_Qual', 'Linked_HapAllelicFrac', 'Linked_AllelicFrac',  'Linked_Pairs', 'Linked_Split', 'Predicted_by']
+    header=['chrom1','pos1','chrom2:pos2','SVType', 'Size','Orientation','Linked_chrom1', 'Linked_pos1', 'Linked_chrom2_pos2', 'Linked_SVType', 'Linked_Orient', 'Linked_Filter', 'Linked_Source', 'Linked_Size', 'Linked_Qual', 'Linked_HapAllelicFrac', 'Linked_AllelicFrac',  'Linked_Pairs', 'Linked_Split', 'Category']
     df2=pd.DataFrame(list1 , columns=header)
     finalDF=pd.concat([short, df2], sort=False, ignore_index=True)
     return finalDF
@@ -382,7 +382,7 @@ def add_calls(calls, CombFile, window, svtype, tool):
         i, j =np.where((all1_chrom1[:, None]==all2_chrom1) & (all1_chrom2[:,None]==all2_chrom2) & (all1_pos1[:,None] >= all2_pos1_l) & (all1_pos1[:,None] <= all2_pos1_h) & (all1_pos2[:,None] >= all2_pos2_l) & (all1_pos2[:,None] <= all2_pos2_h) & (all1_orient[:,None]==all2_orient) & (all1_SV[:,None]==all2_SV))
     tmpDF=calls.copy(deep=True)
     Commons=pd.DataFrame(np.column_stack([CombFile.values[i], tmpDF.values[j]]), columns= CombFile.columns.append(tmpDF.columns))
-    Commons['Predicted_by']=Commons['Predicted_by'].apply(lambda x: check_common(x))
+    Commons['Category']=Commons['Category'].apply(lambda x: check_common(x))
     OnlyCalls= calls[~np.in1d(np.arange(calls.shape[0]), np.unique(j))]
     if tool=="NAIBR":
         OnlyCalls['chrom1']=OnlyCalls['NAIBR_chrom1']
@@ -397,7 +397,7 @@ def add_calls(calls, CombFile, window, svtype, tool):
         OnlyCalls['SVType']=OnlyCalls['GROCSV_SVType']
         OnlyCalls['Orientation']=OnlyCalls['GROCSV_Orient']
     OnlyCalls['Size']=OnlyCalls.apply(lambda x: getSize(x, tool), axis=1)
-    OnlyCalls['Predicted_by']="Only 10XWGS"
+    OnlyCalls['Category']="Only 10XWGS"
     AllDF=pd.concat([Commons, CombFile[~np.in1d(np.arange(CombFile.shape[0]), np.unique(i))], OnlyCalls], ignore_index=True, sort=False)
     return AllDF
 
@@ -405,7 +405,7 @@ def add_calls(calls, CombFile, window, svtype, tool):
 
 def parse_arguments():
     parser= argparse.ArgumentParser(description = "A Python script to combine results from short-reads and linked-reads structural variation calls")
-    parser.add_argument('-SR','--shortreads', help="enter .csv file containing SV calls from short-reads (REQUIRED)")
+    parser.add_argument('-SR','--shortreads', help="enter .tsv file containing SV calls from short-reads (REQUIRED)")
     parser.add_argument('-LR1','--linkedDels', help="enter .vcf file containing small and mid sized deletion calls by longranger (REQUIRED)")
     parser.add_argument('-LR2','--linkedLarge', help="enter .vcf file containing large sized SV calls by longranger (REQUIRED)")
     parser.add_argument('-NAIBR','--NAIBR', help="enter .bed file containing SV calls from NAIBR (REQUIRED)")
@@ -423,7 +423,7 @@ if __name__=='__main__':
         linked, bndList={}, {}
         linked1= read_linked(args.linkedDels, linked)
         linked2= read_linked(args.linkedLarge, linked1)
-        SV_short=pd.read_csv(args.shortreads)
+        SV_short=pd.read_csv(args.shortreads, sep='\t')
         SV_short=SV_short.sort_values(['chrom1','pos1'])
         ### adding longranger calls
         CombFile=compare_SR_LR(linked2, SV_short, int(args.window))
@@ -456,4 +456,4 @@ if __name__=='__main__':
         FinalFile= pd.concat([AllDels, AllDups, AllInvs, AllTrans], ignore_index=True, sort=False)
         FinalFile= FinalFile.sort_values(by=['chrom1','pos1','chrom2:pos2'])
 
-        FinalFile.to_csv(str(args.outdir)+"/Combined_SR_LR.csv", sep=',', index=False)
+        FinalFile.to_csv(str(args.outdir)+"/Combined_SR_LR.csv", sep='\t', index=False)

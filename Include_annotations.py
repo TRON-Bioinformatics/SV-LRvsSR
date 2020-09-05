@@ -56,34 +56,49 @@ def RepeatClass(chromo, reppos, RepMasker):
     else:
         return tmpRep['repClass'].values.tolist()[0]
 
-def annotate(DF, RepMasker, MapFile, segmentalFile, blackList, BAMT, BAML, bt):
-    BAM=pysam.AlignmentFile(BAMT, 'rb')
-    BAMLinked=pysam.AlignmentFile(BAML, 'rb')
-    DF['LocalCoverage_Pos1_SR'], DF['LocalCoverage_Pos1_LR'], DF['LocalCoverage_Pos2_SR'], DF['LocalCoverage_Pos2_LR'],DF['RepPos1'], DF['RepPos2'],DF['Mappable_Pos1'],DF['Mappable_Pos2'],DF['RepPos1_Class'], DF['RepPos2_Class']= 'NA','NA','NA','NA','NA','NA','NA','NA','NA','NA'
+def annotate(DF, RepMasker, MapFile,BAMT, BAML, bt):
+    if BAMT:
+        BAM=pysam.AlignmentFile(BAMT, 'rb')
+        DF['LocalCoverage_Pos1_SR'], DF['LocalCoverage_Pos2_SR'] = 'NA','NA'
+    if BAML:
+        BAMLinked=pysam.AlignmentFile(BAML, 'rb')
+        DF['LocalCoverage_Pos1_LR'], DF['LocalCoverage_Pos2_LR'] = 'NA','NA'
+
+    if RepMasker:
+        DF['RepPos1'], DF['RepPos2'],DF['RepPos1_Class'], DF['RepPos2_Class']= 'NA','NA','NA','NA'
+    if MapFile:
+        DF['Mappable_Pos1'],DF['Mappable_Pos2'] = 'NA','NA'
+
     NewDF= DF.copy(deep=True)
     NewDF['chrom2']=NewDF['chrom2:pos2'].apply(lambda x: x.split(":")[0])
     NewDF['pos2']=NewDF['chrom2:pos2'].apply(lambda x: int(x.split(":")[1]))
     for index,rows in NewDF.iterrows():
-        tmp_a=pileup_pos(rows, BAM, "breakpoint1")
-        tmp_b=pileup_pos(rows, BAMLinked, "breakpoint1")
-        tmp_c=pileup_pos(rows, BAM, "breakpoint2")
-        tmp_d=pileup_pos(rows, BAMLinked, "breakpoint2")
-        tmp_e=repeatAnnotation(bt, rows, "breakpoint1")
-        tmp_f=repeatAnnotation(bt, rows, "breakpoint2")
-        tmp_g=check_mappability(rows, MapFile, "breakpoint1")
-        tmp_h=check_mappability(rows, MapFile, "breakpoint2")
-        NewDF.at[index, 'LocalCoverage_Pos1_SR']=tmp_a
-        NewDF.at[index, 'LocalCoverage_Pos1_LR']=tmp_b
-        NewDF.at[index, 'LocalCoverage_Pos2_SR']=tmp_c
-        NewDF.at[index, 'LocalCoverage_Pos2_LR']=tmp_d
-        NewDF.at[index, 'RepPos1']=tmp_e
-        NewDF.at[index, 'RepPos2']=tmp_f
-        NewDF.at[index, 'Mappable_Pos1']=tmp_g
-        NewDF.at[index, 'Mappable_Pos2']=tmp_h
-        NewDF.at[index,'RepPos1_Class']= RepeatClass(rows['chrom1'], tmp_e, RepMasker)
-        NewDF.at[index,'RepPos2_Class']= RepeatClass(rows['chrom2'], tmp_f, RepMasker)
-    BAM.close()
-    BAMLinked.close()
+        if BAMT:
+            tmp_a=pileup_pos(rows, BAM, "breakpoint1")
+            tmp_c=pileup_pos(rows, BAM, "breakpoint2")
+            NewDF.at[index, 'LocalCoverage_Pos1_SR']=tmp_a
+            NewDF.at[index, 'LocalCoverage_Pos2_SR']=tmp_c
+        if BAML:
+            tmp_b=pileup_pos(rows, BAMLinked, "breakpoint1")
+            tmp_d=pileup_pos(rows, BAMLinked, "breakpoint2")
+            NewDF.at[index, 'LocalCoverage_Pos1_LR']=tmp_b
+            NewDF.at[index, 'LocalCoverage_Pos2_LR']=tmp_d
+        if RepMasker:
+            tmp_e=repeatAnnotation(bt, rows, "breakpoint1")
+            tmp_f=repeatAnnotation(bt, rows, "breakpoint2")
+            NewDF.at[index, 'RepPos1']=tmp_e
+            NewDF.at[index, 'RepPos2']=tmp_f
+            NewDF.at[index,'RepPos1_Class']= RepeatClass(rows['chrom1'], tmp_e, RepMasker)
+            NewDF.at[index,'RepPos2_Class']= RepeatClass(rows['chrom2'], tmp_f, RepMasker)
+        if MapFile:
+            tmp_g=check_mappability(rows, MapFile, "breakpoint1")
+            tmp_h=check_mappability(return ows, MapFile, "breakpoint2")
+            NewDF.at[index, 'Mappable_Pos1']=tmp_g
+            NewDF.at[index, 'Mappable_Pos2']=tmp_h
+    if BAMT:
+        BAM.close()
+    if BAML:
+        BAMLinked.close()
     return NewDF
 
 def split(dfm, chunk_size):
@@ -98,32 +113,34 @@ def split(dfm, chunk_size):
     return CHUNK
 
 if __name__=='__main__':
-    parser=argparse.ArgumentParser(description="Annotate breakpoints with repetitive regions and poor mappability regions and include local coverage around breakpoints")
-    parser.add_argument('-repeatMasker','--repeats', help="enter repeatMasker file (Required)")
-    parser.add_argument('-mappability','--mappability', help="enter mappability track file (Required)")
+    parser=argparse.ArgumentParser(description="Calculates local coverage around breakpoints from cWGS and 10XWGS aligned reads (required feature) and annotate breakpoints with repetitive regions and poor mappability regions")
+    parser.add_argument('-Annotate','--Annotate', help="Annotattion of breakpoints with repetitive and poor mappability regions (Yes or No, deafult=Yes)", default="Yes", type=str)
+    parser.add_argument('-repeatMasker','--repeats', help="enter repeatMasker file (default=None)", default=None)
+    parser.add_argument('-mappability','--mappability', help="enter mappability track file (default=None)", default=None)
     parser.add_argument('-File','--File', help="enter .tsv file with structural variations from GEM quantification (Required)")
-    parser.add_argument('-BAM','--BAMshort',help="enter BAM file with aligned short-reads (Required)")
+    parser.add_argument('-BAM','--BAMshort',help="enter BAM file with aligned short-reads (Required)", default=None)
     parser.add_argument('-BAMLinked','--BAMLinked', help="enter BAM file with aligned linked-reads (Default=None)", default=None)
     parser.add_argument('-Threads','--processes', help="Enter number of cores (default=1)", default=1, type=int)
     parser.add_argument('-outdir','--outdir', help="Enter output directory (Default=current directory)", default=".")
     args=parser.parse_args()
+    CombinedFile= pd.read_csv(args.File, sep='\t')
     if not os.path.exists(args.outdir):
         os.makedirs(args.outdir)
 
-    RepMasker= pd.read_csv(args.repeats, sep='\t')
-    RepMasker=RepMasker.sort_values(by=['genoName', 'genoStart', 'genoEnd'])
-    RepFile = RepMasker[['genoName', 'genoStart', 'genoEnd', 'repName', 'swScore', 'strand']]
-    MapFile= pd.read_csv(args.mappability, sep='\t', header=None, skiprows=1, names=["chrom","pos1","pos2","kmer","unique","strand"])
-
-    CombinedFile= pd.read_csv(args.File, sep='\t')
-    bt=bed_tree(RepFile, 2)
-
+    if args.Annotate in ["Yes","yes"]:
+        RepMasker= pd.read_csv(args.repeats, sep='\t')
+        RepMasker=RepMasker.sort_values(by=['genoName', 'genoStart', 'genoEnd'])
+        RepFile = RepMasker[['genoName', 'genoStart', 'genoEnd', 'repName', 'swScore', 'strand']]
+        MapFile= pd.read_csv(args.mappability, sep='\t', header=None, skiprows=1, names=["chrom","pos1","pos2","kmer","unique","strand"])
+        bt=bed_tree(RepFile, 2)
+    else:
+        RepFile, MapFile, bt = 'NA','NA','NA'
     nthreads= int(args.processes)
     p= multiprocessing.Pool(nthreads)
     chunks=split(CombinedFile, nthreads)
-    workers=[p.apply_async(annotate, args=(i, RepMasker, MapFile, segmentalFile, blackList, args.BAMshort, args.BAMLinked, bt,)) for i in chunks]
+    workers=[p.apply_async(annotate, args=(i, RepMasker, MapFile, args.BAMshort, args.BAMLinked, bt,)) for i in chunks]
     final_result=[worker.get() for worker in workers]
     p.close()
     p.join()
     FinalCombinedFile= pd.concat(results for results in final_result)
-    FinalCombinedFile.to_csv(args.outdir+ '/Combined_SR_LR_500_annotated.tsv', sep='\t', index=False)
+    FinalCombinedFile.to_csv(args.outdir+ '/Annotated.tsv', sep='\t', index=False)

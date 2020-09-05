@@ -63,16 +63,17 @@ def find_GEM(df, bamF, window):
         num_commonbar.append(len(common_bar))
         num_commonmol.append(len(common_mol))
     bamfile.close()
-    df['Count_common_bar']=pd.Series(num_commonbar, index=df.index)
-    df['Count_common_mol']=pd.Series(num_commonmol, index=df.index)
+    df['GEM']=pd.Series(num_commonbar, index=df.index)
+    df['LR_Mol']=pd.Series(num_commonmol, index=df.index)
     return df
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description= "A python script to calculate number of GEMs/barcodes(tag:BX) and molecules(tag:MI) support a particular type and orientation of structural variation")
-    parser.add_argument('-inputFile','--inputFile', help="enter .tsv file containing combined calls")
+    parser.add_argument('-inputFile','--inputFile', help="enter .tsv file containing combined calls (Required)")
     parser.add_argument('-bam','--bamFile', help="enter coordinate sorted bam file from Long Ranger (Lariat) (Required)")
     parser.add_argument('-n','--n', help="enter number of cores to be used (Default=1)", default=1, type=int)
-    parser.add_argument('-out','--output', help="enter output .tsv file name (Required)")
+    parser.add_argument('-outdir','--outdir', help="enter output directory (Default=current directory)", default=".")
+    parser.add_argument('-output','--output', help="enter name of output .tsv file (Required)")
     parser.add_argument('-w','--window', help="window size in <INT> bases to calculate supporting GEMs(Default=1000)", default=1000, type=int)
     args=parser.parse_args()
     All_SV= pd.read_csv(args.inputFile, sep='\t', header=(0))
@@ -82,6 +83,6 @@ if __name__=='__main__':
     final_result=[worker.get() for worker in workers]
     CombinedGEM=pd.concat(results for results in final_result)
     mainCol=list(All_SV.columns.values)
-    mainCol=mainCol+ ['Count_common_bar','Count_common_mol']
+    mainCol=mainCol+ ['GEM','LR_Mol']
     CombinedGEM.columns=mainCol
-    CombinedGEM.to_csv(args.output, sep='\t', index=False)
+    CombinedGEM.to_csv(args.outdir+"/" + args.output, sep='\t', index=False)

@@ -14,53 +14,54 @@ import numpy as np
 import time
 import math
 import multiprocessing
+import pysam
 from template import *
 pd.options.mode.chained_assignment = None
 import subprocess
 import glob
 CurVersion=1.0
 
-def NumberTools(WholeLine):
-    tools=0
-    ListNull= WholeLine.isnull()
-    if ListNull['DellyChrom1']==False:
-        tools+=1
-    if ListNull['LumpyChrom1']==False:
-        tools+=1
-    if ListNull['SvabaChrom1']==False:
-        tools+=1
-    return tools
+# def NumberTools(WholeLine):
+#     tools=0
+#     ListNull= WholeLine.isnull()
+#     if ListNull['DellyChrom1']==False:
+#         tools+=1
+#     if ListNull['LumpyChrom1']==False:
+#         tools+=1
+#     if ListNull['SvabaChrom1']==False:
+#         tools+=1
+#     return tools
 
-def NumberToolsLinked(WholeLine):
-    tools=0
-    ListNull= WholeLine.isnull()
-    if ListNull['Linked_chrom1']==False:
-        tools+=1
-    if ListNull['NAIBR_chrom1']==False:
-        tools+=1
-    if ListNull['GROCSV_chrom1']==False:
-        tools+=1
-    return tools
+# def NumberToolsLinked(WholeLine):
+#     tools=0
+#     ListNull= WholeLine.isnull()
+#     if ListNull['Linked_chrom1']==False:
+#         tools+=1
+#     if ListNull['NAIBR_chrom1']==False:
+#         tools+=1
+#     if ListNull['GROCSV_chrom1']==False:
+#         tools+=1
+#     return tools
 
 def Add_features(CombinedFile, refBit, areaRequant, tmpdir):
     ID=id_generator()
-    totalTools, totalTools_LR=[], []
+    # totalTools, totalTools_LR=[], []
     FusedSeqT_fa=open(str(tmpdir)+"/TumorSV_"+str(ID)+".fa", 'w')
     requantificationBP=open(str(tmpdir)+"/requantBP_"+str(ID)+".txt",'w')
     for i in range(CombinedFile.shape[0]):
-        if 'DellyChrom1' in CombinedFile.iloc[i].columns.tolist() or 'LumpyChrom1' in CombinedFile.iloc[i].columns.tolist() or 'SvabaChrom1' in CombinedFile.iloc[i].columns.tolist():
-            totalTools.append(NumberTools(CombinedFile.iloc[i]))
-        if 'Linked_chrom1' in CombinedFile.iloc[i].columns.tolist() or 'NAIBR_chrom1' in CombinedFile.iloc[i].columns.tolist() or 'GROCSV_chrom1' in CombinedFile.iloc[i].columns.tolist():
-            totalTools_LR.append(NumberToolsLinked(CombinedFile.iloc[i]))
+        # if 'DellyChrom1' in CombinedFile.iloc[i].columns.tolist() or 'LumpyChrom1' in CombinedFile.iloc[i].columns.tolist() or 'SvabaChrom1' in CombinedFile.iloc[i].columns.tolist():
+        #     totalTools.append(NumberTools(CombinedFile.iloc[i]))
+        # if 'Linked_chrom1' in CombinedFile.iloc[i].columns.tolist() or 'NAIBR_chrom1' in CombinedFile.iloc[i].columns.tolist() or 'GROCSV_chrom1' in CombinedFile.iloc[i].columns.tolist():
+        #     totalTools_LR.append(NumberToolsLinked(CombinedFile.iloc[i]))
         Requant, areaRequantT=find_requant(CombinedFile.iloc[i], refBit, areaRequant)
         requantificationBP.write(str(CombinedFile.iloc[i]['chrom1'])+":"+ str(CombinedFile.iloc[i]['pos1']) + "_"+ str(CombinedFile.iloc[i]['chrom2:pos2']) + "_"+ str(CombinedFile.iloc[i]['SVType'])+"_"+ str(CombinedFile.iloc[i]['Orientation'])+ '\t'+str(areaRequantT)+ '\n')
         FusedSeqT_fa.write(">"+str(CombinedFile.iloc[i]['chrom1'])+":"+ str(CombinedFile.iloc[i]['pos1']) + "_"+ str(CombinedFile.iloc[i]['chrom2:pos2']) + "_"+ str(CombinedFile.iloc[i]['SVType'])+"_"+ str(CombinedFile.iloc[i]['Orientation'])+'\n' + Requant+'\n')
     FusedSeqT_fa.close()
     requantificationBP.close()
-    if len(totalTools)!=0:
-        CombinedFile['NumberTools_SR']=pd.Series(totalTools, index=CombinedFile.index)
-    if len(totalTools_LR)!=0:
-        CombinedFile['NumberTools_LR']=pd.Series(totalTools_LR, index=CombinedFile.index)
+    # if len(totalTools)!=0:
+    #     CombinedFile['NumberTools_SR']=pd.Series(totalTools, index=CombinedFile.index)
+    # if len(totalTools_LR)!=0:
+    #     CombinedFile['NumberTools_LR']=pd.Series(totalTools_LR, index=CombinedFile.index)
     return CombinedFile
 
 def calculateRequant(outdir, CombinedFile, SR_R1, SR_R2, tmpdir, junc_cutoff, nthreads, LR_R1, LR_R2):
@@ -90,7 +91,6 @@ def calculateRequant(outdir, CombinedFile, SR_R1, SR_R2, tmpdir, junc_cutoff, nt
         print "aligning cWGS reads to genomic templates (requantification)"
         align(str(outdir)+"/FinalFasta.fa",SR_R1, SR_R2, outdir, tmpdir, nthreads, "SR")
         COUNTS_SR=calculate_Junc_Span(str(outdir)+"/FinalFasta.fa", str(tmpdir)+"/filtered_SR.sorted.bam", junc_cutoff, outdir, requantificationBP, "SR")
-        print "Calculating junction and spanning reads"
         JUNC_READS_SR, SPAN_READS_SR=[],[]
         Ref_Ids=COUNTS_SR.keys()
 
