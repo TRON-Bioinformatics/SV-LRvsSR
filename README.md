@@ -40,9 +40,11 @@ install.packages(c("dplyr","tidyverse","caret","plyr","optparse"))
 ```
 # Usage
 
-## Pipeline to predict SVs from short-reads sequencing and linked-reads sequencing tools are in Commands.org
+1. Predict SVs using short-reads sequencing and linked-reads sequencing tools
+Refer to Commands.org
 
-## Integrate SV calls from short-reads sequencing tools
+2. Integrate SV calls from short-reads sequencing tools
+
 python Integrate.py \
 -chromLengths `<length of chromosomes eg: /data/chromInfo_hg38.txt>` \
 -delly `<comma separated vcf files generated from Delly in following order: Deletion.vcf,Duplication.vcf,Inversion.vcf,Translocation.vcf>` \
@@ -55,7 +57,7 @@ python Integrate.py \
 
 This generates a tab delimited file with SV calls from all three tools. Example file: /example/Combined_SR.tsv
 
-## Integrate SV calls from linked-reads sequencing tools and also combine it with short-reads calls
+3. Combind SV calls from linked-reads and short-reads tools
 
 python Combine_SR_LR.py \
 -SR `<tab delimited file containing integrated SV calls from short-reads. example: /example/Combined_SR.tsv>` \
@@ -68,13 +70,13 @@ python Combine_SR_LR.py \
 
 It generates a tab delimited file containing all overlapping and non overlapping SV calls from short-reads and linked-reads tools. Example file: /example/Combined_SR_LR.tsv
 
-## Perform requantification and add features to each SV call
+4. Perform requantification and add features
 
 python Requantification.py \
 -inputFile `<tab delimited file containing all SV calls. example: /example/Combined_SR_LR.tsv>` \
 -out `<Ouput file name>` \
 -n `<Number of cores to use. Default=1>` \
--refBit `<.2bit file of th reference genome>` \
+-refBit `<.2bit file of the reference genome>` \
 -area `<Area in <INT> bases around the breakpoints for the rquantification genomic template. Default=500 bases>` \
 -Read1_SR `<Paired-end read 1 from Illumina short-reads sequencing>` \
 -Read2_SR `<Paired-end read 2 from Illumina short-reads sequencing>` \
@@ -86,6 +88,7 @@ python Requantification.py \
 -lengths `<length of chromosomes eg: /data/chromInfo_hg38.txt>` \
 
 It generates a tab delimited SV file with requantification related features like junction reads and spanning pairs calculated from short-read and/or linked-reads. Example: /example/Combined_SR_LR_requant.tsv
+TwoBit file of the reference genome can be created as: [https://genome.ucsc.edu/goldenPath/help/twoBit.html]
 
 ## Include GEM counts for all SVs from Lariat linked-reads generated alignment file
 
