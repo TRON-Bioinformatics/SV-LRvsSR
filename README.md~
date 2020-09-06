@@ -44,14 +44,14 @@ install.packages(c("dplyr","tidyverse","caret","plyr","optparse"))
 
 ## Integrate SV calls from short-reads sequencing tools
 python Integrate.py \
--chromLengths `<length of chromosomes eg: /data/chromInfo_hg38.txt>` \
--delly `<comma separated vcf files generated from Delly in following order: Deletion.vcf,Duplication.vcf,Inversion.vcf,Translocation.vcf>` \
--lumpy `<vcf file with SV calls from Lumpy>` \
--svaba `<vcf file with SV calls from SvABA>` \
--frag `<Window size of <INT> bases for integrating overlapping SV calls from tools. Default=500 bases>` \
--outdir `<Output directory path>` \
--mode `<germline or somatic. Default=germline>` \
--finalFile `<Output file name>`\
+-chromLengths <length of chromosomes eg: /data/chromInfo_hg38.txt> \
+-delly <comma separated vcf files generated from Delly in following order: Deletion.vcf,Duplication.vcf,Inversion.vcf,Translocation.vcf> \
+-lumpy <vcf file with SV calls from Lumpy> \
+-svaba <vcf file with SV calls from SvABA> \
+-frag <Window size of <INT> bases for integrating overlapping SV calls from tools. Default=500 bases> \
+-outdir <Output directory path> \
+-mode <germline or somatic. Default=germline> \
+-finalFile <Output file name>\
 
 This generates a tab delimited file with SV calls from all three tools. Example file: /example/Combined_SR.tsv
 
