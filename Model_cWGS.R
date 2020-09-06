@@ -11,14 +11,17 @@ options(stringsAsFactors = FALSE)
 argument_list <- list(
   make_option(c("-f", "--SVFile"), default="", help="Enter .tsv file with list of SV"), 
   make_option(c("-t", "--training", default="no", help="Enter whether model needs to be trained or not (yes or no; default=no")),
-  make_option(c("-r", "--total_reads", default="", help="Enter number of total paired-end reads in the sample")),
+  make_option(c("-r", "--total_reads", type="integer", default=as.integer(0), help="Enter number of total paired-end reads in the sample")),
   make_option(c("-m", "--model_file"), default="", help="Path to .rds file containing the machine learning model (./Model/SR_Model.rds)"),
-  make_option(c("-s", "--prediction_threshold"), default=0.6, 
-              help="Prediction score threshold above which a SV is called positive (default=0.7, max=1, min=0)"),
+  make_option(c("-s", "--prediction_threshold"), type="double", default=as.double(0.6), 
+              help="Prediction score threshold above which a SV is called positive (default=0.6, max=1, min=0)"),
   make_option(c("-o", "--output"), default="", help="Enter output file name"),
   make_option(c("-d", "--outdir", default=".", help="Enter output directory"))
 )
 opt <- parse_args(OptionParser(option_list=argument_list))
+
+opt$total_reads<- as.numeric(opt$total_reads)
+opt$prediction_threshold<- as.double(opt$prediction_threshold)
 
 ### check required arguments
 if(is.na(opt$SVFile) | opt$SVFile == "") {
@@ -29,10 +32,9 @@ if(is.na(opt$output) | opt$output == "") {
   stop("Missing output file name...")
 }
 
-if(is.na(opt$total_reads) | opt$total_reads == "") {
+if(opt$total_reads == 0) {
   stop("Missing total number of paired-end reads in the sample...")
 }
-
 
 ### read files and arguments
 Tog<- read.csv(opt$SVFile, sep = '\t', header=T, stringsAsFactors = F, na.strings = c("","NA"," ",NA,NaN))
