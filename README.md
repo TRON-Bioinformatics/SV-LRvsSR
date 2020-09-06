@@ -40,7 +40,7 @@ install.packages(c("dplyr","tidyverse","caret","plyr","optparse"))
 ```
 # Usage
 
-1. Predict SVs using short-reads sequencing and linked-reads sequencing tools
+1. Predict SVs using short-reads sequencing and linked-reads sequencing tools.\
 Refer to Commands.org
 
 2. Integrate SV calls from short-reads sequencing tools
@@ -87,10 +87,10 @@ python Requantification.py \
 -cutoff `<a read after re-alignment to genomic template has to overlap breakpoint with atleast <INT> bases. Deafult=10 bases>` \
 -lengths `<length of chromosomes eg: /data/chromInfo_hg38.txt>` \
 
-It generates a tab delimited SV file with requantification related features like junction reads and spanning pairs calculated from short-read and/or linked-reads. Example: /example/Combined_SR_LR_requant.tsv
+It generates a tab delimited SV file with requantification related features like junction reads and spanning pairs calculated from short-read and/or linked-reads. Example: /example/Combined_SR_LR_requant.tsv. If you wish to only use short-reads or linked-reads calls then provide reads only from relevant technology.\
 TwoBit file of the reference genome can be created as: [https://genome.ucsc.edu/goldenPath/help/twoBit.html]
 
-## Include GEM counts for all SVs from Lariat linked-reads generated alignment file
+5. Count supporting GEM from linked-reads sequencing alignment
 
 python GEM_count.py \
 -inputFile `<tab delimited file containing SV calls. Example: /example/Combined_SR_LR_requant.tsv>`\
@@ -102,7 +102,7 @@ python GEM_count.py \
 
 This generates tab delimited file containing suppporting GEM counts for each SV. Example: /example/Combined_SR_LR_requant_GEM.tsv
 
-## Include local coverage around breakpoints and annotate breakpoints with repetitive and poor mappability regions
+6. Include local coverage around breakpoints and annotate with repetitive and poor mappability regions
 
 python Include_annotations.py \
 -Annotate `<Annotate breakpoints with repetitive and poor mappability regions. Default=Yes>` \
@@ -114,4 +114,35 @@ python Include_annotations.py \
 -Threads `<Number of cores. Default=1>` \
 -outdir `<Output directory path>`\
 
-This generates tab delimited file with local coverage around breakpoints calculated from short-reads and/or linked-reads alignment file. If "Annotate" argument is Yes, then each breakpoint is annotated with repetitive and porr mappability regions. Example file: /example/Combined_SR_LR_requant_GEM_annotated.tsv
+This generates tab delimited file with local coverage around breakpoints calculated from short-reads and/or linked-reads alignment file. If "Annotate" argument is Yes, then each breakpoint is annotated with repetitive and porr mappability regions. Example file: /example/Combined_SR_LR_requant_GEM_annotated.tsv.\
+
+7. Train and/or predict probability of true SV from short-reads technology
+
+Rscript Model_cWGS.R\
+-f `<Enter .tsv (tab delimited file) with features for each SV. example: /example/Combined_SR_LR_requant_GEM_annotated.tsv>`\
+-t `<Enter whether to train a new model (yes or no). Default=no>`\
+-m `<Enter the trained model for predicting true SV calls. example: /Model/SR_Model.rds>`\
+-r `<Number of total paired-end reads in the sample (required for normalization of requantification features)>`\
+-s `<Mark positive SV calls with probability threshold score > <FLOAT>. Default=0.6 (max=1.0, min=0.0)>`\
+-o `<Output file name with 'PredictionSR' field with positive SV calls>`\
+-d `<Output directory path. Default=current directory>`\
+
+This generates a tab delimitd file with a field "PredictionSR" reporting "Positive" for true SV calls. Example file: /example/cWGS_predictions.tsv \
+If you wish to train a new logistic regression model then include a column "Validation" with Positive or Negative calls in input file (-f argument). And pass -t argument with "yes". This file should also contain features/columns derived from short-reads sequencing alignments. The columns are: JR_SR (junction reads), SP_SR (spanning pairs), SVType (Dels, Dups, Invs or Trans), Size (size of SV), LocalCoverage_Pos1_SR (local coverage around breakpoint 1), LocalCoverage_Pos2_SR (local coverage around breakpoint 2).\
+Or else the trained model (/Model/SR_Model.rds) could be used for predicting the probability of true SV calls.
+
+8. Train and/or predict probability of true SV from linked-reads technology
+
+Rscript Model_10XWGS.R\
+-f `<Enter .tsv (tab delimited file) with features for each SV. example: /example/Combined_SR_LR_requant_GEM_annotated.tsv>`\
+-t `<Enter whether to train a new model (yes or no). Default=no>`\
+-m `<Enter the trained model for predicting true SV calls. example: /Model/LR_Model.rds>`\
+-r `<Number of total paired-end reads in the sample (required for normalization of requantification features)>`\
+-g `<Number of GEMs detected in the linked-reads experiment (required for normalization of GEM count)>`\
+-s `<Mark positive SV calls with probability threshold score > <FLOAT>. Default=0.6 (max=1.0, min=0.0)>`\
+-o `<Output file name with 'PredictionLR' field with positive SV calls>`\
+-d `<Output directory path. Default=current directory>`\
+
+This generates a tab delimitd file with a field "PredictionLR" reporting "Positive" for true SV calls. Example file: /example/10XWGS_predictions.tsv \
+If you wish to train a new logistic regression model then include a column "Validation" with Positive or Negative calls in input file (-f argument). And pass -t argument with "yes". This file should also contain features/columns derived from linked-reads sequencing alignments. The columns are: JR_LR (junction reads), SP_LR (spanning pairs), SVType (Dels, Dups, Invs or Trans), Size (size of SV), LocalCoverage_Pos1_LR (local coverage around breakpoint 1), LocalCoverage_Pos2_LR (local coverage around breakpoint 2) and GEM (normalized GEM count supporting the SV).\
+Or else the trained model (/Model/LR_Model.rds) could be used for predicting the probability of true SV calls.

@@ -13,7 +13,7 @@ argument_list <- list(
   make_option(c("-t", "--training", default="no", help="Enter whether model needs to be trained or not (yes or no; default=no")),
   make_option(c("-r", "--total_reads", default="", help="Enter number of total paired-end reads in the sample")),
   make_option(c("-m", "--model_file"), default="", help="Path to .rds file containing the machine learning model (./Model/SR_Model.rds)"),
-  make_option(c("-s", "--prediction_threshold"), default=0.7, 
+  make_option(c("-s", "--prediction_threshold"), default=0.6, 
               help="Prediction score threshold above which a SV is called positive (default=0.7, max=1, min=0)"),
   make_option(c("-o", "--output"), default="", help="Enter output file name"),
   make_option(c("-d", "--outdir", default=".", help="Enter output directory"))
@@ -42,8 +42,8 @@ if ("Category" %in% colnames(Tog)){
     dplyr::filter(Size>50|Size==0) %>% 
     dplyr::mutate(JR_SR = log2(((JR_SR/(2*opt$total_reads))*100000000) + 1),
                   SP_SR = log2(((SP_SR/(opt$total_reads))*100000000) + 1),
-                  LocalCoverage_Pos1_SR = log2(LocalCoverage_Pos1_SR +1),
-                  LocalCoverage_Pos2_SR = log2(LocalCoverage_Pos2_SR +1),
+                  LocalCoverage_Pos1 = log2(LocalCoverage_Pos1_SR +1),
+                  LocalCoverage_Pos2 = log2(LocalCoverage_Pos2_SR +1),
                   Size = log10(Size+1))
   
 } else {
@@ -52,8 +52,8 @@ if ("Category" %in% colnames(Tog)){
     dplyr::mutate(SVType = factor(SVType, levels=c("Dels","Dups","Invs","Trans")),
                   JR_SR = log2(((JR_SR/(2*opt$total_reads))*100000000) + 1),
                   SP_SR = log2(((SP_SR/(opt$total_reads))*100000000) + 1),
-                  LocalCoverage_Pos1_SR = log2(LocalCoverage_Pos1_SR +1),
-                  LocalCoverage_Pos2_SR = log2(LocalCoverage_Pos2_SR +1),
+                  LocalCoverage_Pos1 = log2(LocalCoverage_Pos1_SR +1),
+                  LocalCoverage_Pos2 = log2(LocalCoverage_Pos2_SR +1),
                   Size = log10(Size+1))
 }
 
@@ -101,7 +101,7 @@ if (opt$training=="yes" | opt$training=="Yes"){
                                  classProbs=TRUE,
                                  summaryFunction = twoClassSummary,
                                  savePredictions= TRUE)
-    FinalModel<- train(Validation ~ JR_SR + SP_SR + SVType + Size + LocalCoverage_Pos1_SR + LocalCoverage_Pos2_SR,
+    FinalModel<- train(Validation ~ JR_SR + SP_SR + SVType + Size + LocalCoverage_Pos1 + LocalCoverage_Pos2,
                        data = dplyr::filter(Tog, is.na(Validation)),
                        method = "glm", maximize=TRUE, metric="ROC",
                        trControl= train.control, family=binomial(link='logit'))

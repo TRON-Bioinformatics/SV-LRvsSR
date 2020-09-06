@@ -19,7 +19,7 @@ argument_list <- list(
                 help="Enter number of total GEMs detected in linked-reads experiment")),
   make_option(c("-m", "--model_file"), default="", 
               help="Path to .rds file containing the machine learning model (./Model/LR_Model.rds)"),
-  make_option(c("-s", "--prediction_threshold"), default=0.7, 
+  make_option(c("-s", "--prediction_threshold"), default=0.6, 
               help="Prediction score threshold above which a SV is called positive (default=0.7, max=1, min=0)"),
   make_option(c("-o", "--output"), default="", 
               help="Enter output file name"),
@@ -53,8 +53,8 @@ if ("Category" %in% colnames(Tog)){
     dplyr::filter(Size>50|Size==0) %>% 
     dplyr::mutate(JR_LR = log2(((JR_LR/(2*opt$total_reads))*100000000) + 1),
                   SP_LR = log2(((SP_LR/(opt$total_reads))*100000000) + 1),
-                  LocalCoverage_Pos1_LR = log2(LocalCoverage_Pos1_LR +1),
-                  LocalCoverage_Pos2_LR = log2(LocalCoverage_Pos2_LR +1),
+                  LocalCoverage_Pos1 = log2(LocalCoverage_Pos1_LR +1),
+                  LocalCoverage_Pos2 = log2(LocalCoverage_Pos2_LR +1),
                   Size = log10(Size+1),
                   GEM = log2(((GEM/opt$gem)*1000000) +1))
   
@@ -64,8 +64,8 @@ if ("Category" %in% colnames(Tog)){
     dplyr::mutate(SVType = factor(SVType, levels=c("Dels","Dups","Invs","Trans")),
                   JR_LR = log2(((JR_LR/(2*opt$total_reads))*100000000) + 1),
                   SP_LR = log2(((SP_LR/(opt$total_reads))*100000000) + 1),
-                  LocalCoverage_Pos1_LR = log2(LocalCoverage_Pos1_LR +1),
-                  LocalCoverage_Pos2_LR = log2(LocalCoverage_Pos2_LR +1),
+                  LocalCoverage_Pos1 = log2(LocalCoverage_Pos1_LR +1),
+                  LocalCoverage_Pos2 = log2(LocalCoverage_Pos2_LR +1),
                   Size = log10(Size+1),
                   GEM = log2(((GEM/opt$gem)*1000000) +1))
 }
@@ -118,7 +118,7 @@ if (opt$training=="yes" | opt$training=="Yes"){
                                  classProbs=TRUE,
                                  summaryFunction = twoClassSummary,
                                  savePredictions= TRUE)
-    FinalModel<- train(Validation ~ GEM + JR_LR + SP_LR + SVType + Size + LocalCoverage_Pos1_LR + LocalCoverage_Pos2_LR,
+    FinalModel<- train(Validation ~ GEM + JR_LR + SP_LR + SVType + Size + LocalCoverage_Pos1 + LocalCoverage_Pos2,
                        data = dplyr::filter(Tog, is.na(Validation)),
                        method = "glm", maximize=TRUE, metric="ROC",
                        trControl= train.control, family=binomial(link='logit'))
